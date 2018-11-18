@@ -49,7 +49,7 @@ end REG;
 
 architecture Behavioral of REG is
 	type REGS IS array (11 downto 0) of STD_LOGIC_VECTOR (15 downto 0);
-	signal   regist:	REGS;
+	signal   regist:	REGS	:=(others => ZeroWord);
 begin
 	Write:	process(clk)
 				begin
