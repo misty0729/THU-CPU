@@ -1,0 +1,6 @@
+*
+!*.md
+!*.xise
+!/datapath/*
+!/CPU/*.vhd
+!.gitignore
