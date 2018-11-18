@@ -19,6 +19,9 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use WORK.DEFINES.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -143,6 +146,28 @@ begin
 	
 	logic: process(rst, op_in) is
 	begin
+      if rst = RstEnable then
+        logic_out := ZeroWord;
+      else
+        case op_in is
+          when EXE_AND_OP =>
+            logic_out := reg1_data_in and reg2_data_in;
+          when EXE_CMP_OP =>
+            
+          when EXE_COMI_OP =>
+          when EXE_NOT_OP =>
+            logic_out := not reg1_data_in;
+          when EXE_OR_OP =>
+            logic_out := reg1_data_in or reg2_data_in;
+          when EXE_SLL_OP =>
+          when EXE_SLLV_OP =>
+          when EXE_SRA_OP =>
+          when EXE_SRAV_OP =>
+          when EXE_SRL_OP =>
+          when EXE_SRLV_OP =>
+          when EXE_XOR_OP =>
+            logic_out := reg1_data_in xor reg2_data_in;
+      end if;
 	end process logic;
 	
 	branch: process(rst, op_in) is
