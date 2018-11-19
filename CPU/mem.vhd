@@ -38,7 +38,7 @@ entity mem is
 		op_type_in : in STD_LOGIC_VECTOR (2 downto 0);
 		--写使能
 		reg_write_in : in STD_LOGIC;
-		reg_addr_in : in STD_LOGIC_VECTOR(15 downto 0);
+		reg_addr_in : in STD_LOGIC_VECTOR(3 downto 0);
 		--写入寄存器的数据
 		reg_data_in : in STD_LOGIC_VECTOR(15 downto 0);
 		--读/写的内存地址
@@ -49,7 +49,7 @@ entity mem is
 		rst : in STD_LOGIC;
 
 		reg_write_out : out STD_LOGIC;
-		reg_addr_out : out STD_LOGIC_VECTOR(15 downto 0);
+		reg_addr_out : out STD_LOGIC_VECTOR(3 downto 0);
 		reg_data_out : out STD_LOGIC_VECTOR(15 downto 0);
 
 		--读/写内存地址
@@ -68,7 +68,7 @@ begin
 		if(rst = RstEnable) then
 			reg_write_out <= WriteDisable;
 			reg_data_out <= ZeroWord;
-			reg_addr_out <= ZeroWord;
+			reg_addr_out <= ZERO_REGISTER;
 			mem_addr_out <= ZeroWord;
 			mem_data_out <= ZeroWord;
 			mem_ce_out <= RamDisable;
