@@ -50,14 +50,14 @@ entity EX is
 end EX;
 
 architecture Behavioral of EX is
-	variable nop_out: STD_LOGIC_VECTOR(15 downto 0);
-	variable arith_out: STD_LOGIC_VECTOR(15 downto 0);
-	variable logic_out: STD_LOGIC_VECTOR(15 downto 0);
-	variable branch_out: STD_LOGIC_VECTOR(15 downto 0);
-	variable jump_out: STD_LOGIC_VECTOR(15 downto 0);
-	variable load_out: STD_LOGIC_VECTOR(15 downto 0);
-	variable move_out: STD_LOGIC_VECTOR(15 downto 0);
-	variable store_out: STD_LOGIC_VECTOR(15 downto 0);
+	SHARED variable nop_out: STD_LOGIC_VECTOR(15 downto 0);
+	SHARED variable arith_out: STD_LOGIC_VECTOR(15 downto 0);
+	SHARED variable logic_out: STD_LOGIC_VECTOR(15 downto 0);
+	SHARED variable branch_out: STD_LOGIC_VECTOR(15 downto 0);
+	SHARED variable jump_out: STD_LOGIC_VECTOR(15 downto 0);
+	SHARED variable load_out: STD_LOGIC_VECTOR(15 downto 0);
+	SHARED variable move_out: STD_LOGIC_VECTOR(15 downto 0);
+	SHARED variable store_out: STD_LOGIC_VECTOR(15 downto 0);
 begin
 	nop: process(rst, op_in) is
 	begin
@@ -67,7 +67,7 @@ begin
 			case op_in is
 				when EXE_NOP_OP =>
 					nop_out := ZeroWord;
-				when default =>
+				when others =>
 					nop_out := ZeroWord;
 			end case;
 		end if;
@@ -138,7 +138,7 @@ begin
 					
 				when EXE_SUBU_OP =>
 					arith_out := reg1_data_in - reg2_data_in;
-				when default =>
+				when others =>
 					arith_out := ZeroWord;
 			end case;
 		end if;
@@ -153,41 +153,97 @@ begin
           when EXE_AND_OP =>
             logic_out := reg1_data_in and reg2_data_in;
           when EXE_CMP_OP =>
-            
-          when EXE_COMI_OP =>
+            if reg1_data_in = reg2_data_in then
+					logic_out := ZeroWord;
+				else
+					logic_out := "0000000000000001";
+				end if;
+          when EXE_CMPI_OP =>
+				if reg1_data_in = reg2_data_in then
+					logic_out := ZeroWord;
+				else
+					logic_out := "0000000000000001";
+				end if;
           when EXE_NOT_OP =>
             logic_out := not reg1_data_in;
           when EXE_OR_OP =>
             logic_out := reg1_data_in or reg2_data_in;
           when EXE_SLL_OP =>
+				if reg2_data_in = ZeroWord then
+					logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SLL 8);
+				else
+					logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SLL CONV_INTEGER(reg2_data_in));
+				end if;
           when EXE_SLLV_OP =>
+				logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SLL CONV_INTEGER(reg2_data_in));
           when EXE_SRA_OP =>
+				if reg2_data_in = ZeroWord then
+					logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRA 8);
+				else
+					logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRA CONV_INTEGER(reg2_data_in));
+				end if;
           when EXE_SRAV_OP =>
+				logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRA CONV_INTEGER(reg2_data_in));
           when EXE_SRL_OP =>
+				if reg2_data_in = ZeroWord then
+					logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRL 8);
+				else
+					logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRL CONV_INTEGER(reg2_data_in));
+				end if;
           when EXE_SRLV_OP =>
+				logic_out := TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRL CONV_INTEGER(reg2_data_in));
           when EXE_XOR_OP =>
             logic_out := reg1_data_in xor reg2_data_in;
+			 when others =>
+				logic_out := ZeroWord;
+			end case;
       end if;
 	end process logic;
 	
 	branch: process(rst, op_in) is
 	begin
+		branch_out := ZeroWord;
 	end process branch;
 	
 	jump: process(rst, op_in) is
 	begin
+		if rst = RstEnable then
+			jump_out := ZeroWord;
+		else
+			case op_in is
+				when EXE_JALR_OP =>
+					jump_out := reg2_data_in;
+				when others =>
+					jump_out := ZeroWord;
+			end case;
+		end if;
 	end process jump;
 	
 	load: process(rst, op_in) is
 	begin
+		if rst = RstEnable then
+			load_out := ZeroWord;
+		else
+			load_out := reg1_data_in + reg2_data_in;
+		end if;
 	end process load;
 	
 	move: process(rst, op_in) is
 	begin
+		if rst = RstEnable then
+			move_out := ZeroWord;
+		else
+			move_out := reg1_data_in;
+		end if;
 	end process move;
 	
 	store: process(rst, op_in) is
 	begin
+		if rst = RstEnable then
+			store_out := ZeroWord;
+		else
+			store_out := reg1_data_in + reg2_data_in;
+		end if;
 	end process store;
 	
 	output: process(op_type_in) is
@@ -202,7 +258,25 @@ begin
 			when EXE_ARITH_TYPE =>
 				reg_data_out <= arith_out;
 				mem_addr_out <= ZeroWord;
-			when default =>
+			when EXE_LOGIC_TYPE =>
+				reg_data_out <= logic_out;
+				mem_addr_out <= ZeroWord;
+			when EXE_BRANCH_TYPE =>
+				reg_data_out <= branch_out;
+				mem_addr_out <= ZeroWord;
+			when EXE_JUMP_TYPE =>
+				reg_data_out <= jump_out;
+				mem_addr_out <= ZeroWord;
+			when EXE_LOAD_TYPE =>
+				reg_data_out <= ZeroWord;
+				mem_addr_out <= load_out;
+			when EXE_MOVE_TYPE =>
+				reg_data_out <= move_out;
+				mem_addr_out <= ZeroWord;
+			when EXE_STORE_TYPE =>
+				reg_data_out <= ZeroWord;
+				mem_addr_out <= store_out;
+			when others =>
 				reg_data_out <= ZeroWord;
 				mem_addr_out <= ZeroWord;
 		end case;
