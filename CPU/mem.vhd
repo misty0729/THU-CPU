@@ -101,5 +101,7 @@ begin
 					mem_we_out <= Write;
 			end case;
 		end if;
+	end process;
+end Behavioral;
 
 
