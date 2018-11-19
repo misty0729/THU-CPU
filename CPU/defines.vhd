@@ -42,6 +42,10 @@ package defines is
 	constant NoStop:			STD_LOGIC	:='0';
 	constant Branch:			STD_LOGIC	:='1';
 	constant NoBranch:		STD_LOGIC	:='0';
+	constant RamEnable : 	STD_LOGIC 	:='0';
+	constant RamDisable : 	STD_LOGIC	:='1';
+	constant Write : 		STD_LOGIC 	:='1';
+	constant Read  : 		STD_LOGIC 	:='0';  
 
 	--OP
 	constant EXE_ADDIU_OP:	STD_LOGIC_VECTOR(5 downto 0)	:="000010";
