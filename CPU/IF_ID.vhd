@@ -36,26 +36,24 @@ entity IF_ID is
 	Port(	rst:		in		STD_LOGIC;
 			clk:		in		STD_LOGIC;
 			stall:		in		STD_LOGIC;
-			if_pc:		in 		STD_LOGIC;
-			if_inst:	in 		STD_LOGIC;
-			id_pc: 		out		STD_LOGIC;
-			id_inst:	out 	STD_LOGIC;
+			if_pc:		in  	STD_LOGIC_VECTOR (4 downto 0);
+			if_inst:	in  	STD_LOGIC_VECTOR (15 downto 0);
+			id_pc: 		out  	STD_LOGIC_VECTOR (15 downto 0);
+			id_inst:	out 	STD_LOGIC_VECTOR (15 downto 0);
 end IF_ID;
 
 architecture Behavioral of IF_ID is
-	type REGS IS array (11 downto 0) of STD_LOGIC_VECTOR (15 downto 0);
-	signal   regist:	REGS;
 begin
-	ifid:	process(clk)
-				begin
-					if (rising_edge(clk)) then
-						if (rst == RstEnable) then
-							id_pc <= ZeroWord;
-							id_inst <= ZeroWord;
-						else
-							id_pc <= if_pc;
-							id_inst <= if_inst;
-						end if;
-					end if;
-				end process;
+	process(clk)
+		begin
+			if (rising_edge(clk)) then
+				if (rst = RstEnable) then
+					id_pc <= ZeroWord;
+					id_inst <= ZeroWord;
+				else
+					id_pc <= if_pc;
+					id_inst <= if_inst;
+				end if;
+			end if;
+		end process;
 end Behavioral;
