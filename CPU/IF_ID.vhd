@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    19:02:47 11/17/2018 
+-- Create Date:    
 -- Design Name: 
--- Module Name:    REG - Behavioral 
+-- Module Name:    if_id - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
