@@ -38,7 +38,9 @@ entity PC is
            stall : in  STD_LOGIC;
            clk : in  STD_LOGIC;
            rst : in  STD_LOGIC;
+			  ram_in: in STD_LOGIC_VECTOR (15 downto 0);
            pc : out  STD_LOGIC_VECTOR (17 downto 0);
+			  data: out STD_LOGIC_VECTOR (15 downto 0);
            Ram2OE : out  STD_LOGIC;
            Ram2WE : out  STD_LOGIC;
            Ram2EN : out  STD_LOGIC);
@@ -54,6 +56,7 @@ begin
 	Ram2OE <= OE_tmp;
 	Ram2WE <= WE_tmp;
 	Ram2EN <= EN_tmp;
+	data <= ram_in;
 	
 	pc_arr: process(clk, rst, branch_flag_in, branch_target_addr_in) is
 	begin
