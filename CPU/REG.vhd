@@ -66,14 +66,16 @@ begin
 				begin
 					if (rst = RstDisable) then
 						rdata1 <= ZeroWord;
-					elsif (re1 = ReadDisable or raddr1 = ZERO_REGISTER) then
-						rdata1 <= ZeroWord;
-					else
-						if we = WriteEnable and raddr1 = waddr then
+					elsif (re1 = ReadEnable) then
+						if (raddr1 = ZERO_REGISTER) then
+							rdata1 <= ZeroWord;
+						elsif (we = WriteEnable and raddr1 = waddr) then
 							rdata1 <= wdata;
 						else 
 							rdata1 <= regist(conv_integer(raddr1));
 						end if;
+					else 
+						rdata1 <= ZeroWord;
 					end if;
 				end process;
 				
@@ -81,14 +83,16 @@ begin
 				begin
 					if (rst = RstDisable) then
 						rdata2 <= ZeroWord;
-					elsif (re2 = ReadDisable or raddr2 = ZERO_REGISTER) then
-						rdata2 <= ZeroWord;
-					else
-						if we = WriteEnable and raddr2 = waddr then
+					elsif (re2 = ReadEnable) then
+						if (raddr2 = ZERO_REGISTER) then
+							rdata2 <= ZeroWord;
+						elsif (we = WriteEnable and raddr2 = waddr) then
 							rdata2 <= wdata;
 						else 
 							rdata2 <= regist(conv_integer(raddr2));
 						end if;
+					else 
+						rdata2 <= ZeroWord;
 					end if;
 				end process;
 end Behavioral;
