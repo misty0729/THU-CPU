@@ -44,8 +44,7 @@ entity mem_wb is
 		mem_write_reg_data : in STD_LOGIC_VECTOR(15 downto 0);
 		wb_write_reg_addr : out STD_LOGIC_VECTOR(3 downto 0);
 		wb_write_reg_data : out STD_LOGIC_VECTOR(15 downto 0);
-		wb_write_reg : out STD_LOGIC;
-		);
+		wb_write_reg : out STD_LOGIC);
 end mem_wb;
 
 architecture Behavioral of mem_wb is

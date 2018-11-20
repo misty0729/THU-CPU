@@ -83,7 +83,7 @@ begin
 					mem_addr_out <= mem_addr_in;
 					mem_data_out <= ZeroWord;
 					mem_we_out <= Read;
-					mem_ce_out <= RamEnable
+					mem_ce_out <= RamEnable;
 					reg_data_out <= mem_read_data_in;
 				--store 指令
 				when "111" =>
@@ -91,7 +91,7 @@ begin
 					mem_data_out <= mem_write_data_in;
 					mem_we_out <= Write;
 					reg_data_out <= reg_data_in;
-					mem_ce_out <= RamEnable
+					mem_ce_out <= RamEnable;
 				-- 不需要访问和修改内存的指令
 				when others => 
 					reg_data_out <= reg_data_in;
