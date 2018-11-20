@@ -4,3 +4,4 @@
 !/datapath/
 !/CPU/
 !.gitignore
+!*.vhd
