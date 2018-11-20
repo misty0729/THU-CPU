@@ -32,7 +32,7 @@ use WORK.DEFINES.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity mem is 
+entity MEM is 
 	Port (
 		--指令的类别
 		op_type_in : in STD_LOGIC_VECTOR (2 downto 0);
@@ -59,9 +59,9 @@ entity mem is
 		--操作ram1读写的两个使能端口
 		mem_we_out : out STD_LOGIC;
 		mem_ce_out : out STD_LOGIC);
-end mem;
+end MEM;
 
-architecture Behavioral of mem is
+architecture Behavioral of MEM is
 begin
 	process(rst,mem_write_data_in,mem_addr_in,op_type_in,mem_read_data_in)
 	begin

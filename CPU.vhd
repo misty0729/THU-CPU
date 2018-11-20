@@ -121,6 +121,7 @@ signal wb_reg_write_in: STD_LOGIC;
 signal wb_reg_addr_in: STD_LOGIC_VECTOR(3 downto 0);
 signal wb_reg_data_in: STD_LOGIC_VECTOR(15 downto 0);
 
+
 component PC
     Port ( branch_target_addr_in :  in  STD_LOGIC_VECTOR (15 downto 0);
            branch_flag_in :         in  STD_LOGIC;
@@ -190,7 +191,7 @@ component ID_EX
            ex_mem_write_data : 	    out  STD_LOGIC_VECTOR (15 downto 0));
 end component;
 
-entity EX is
+component EX
 
     Port ( op_in :              in  STD_LOGIC_VECTOR (5 downto 0);
            op_type_in :         in  STD_LOGIC_VECTOR (2 downto 0);
@@ -206,14 +207,14 @@ entity EX is
            reg_data_out :       out  STD_LOGIC_VECTOR (15 downto 0);
            mem_addr_out :       out  STD_LOGIC_VECTOR (15 downto 0);
            mem_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0));
-end EX;
+end component;
 
 component EX_MEM
     Port ( ex_op_type :         in  STD_LOGIC_VECTOR (2 downto 0);
            ex_reg_write :       in  STD_LOGIC;
            ex_reg_addr :        in  STD_LOGIC_VECTOR (3 downto 0);
            ex_reg_data :        in  STD_LOGIC_VECTOR (15 downto 0);
-           ex_mem_addr :           in  STD_LOGIC_VECTOR (15 downto 0);
+           ex_mem_addr :        in  STD_LOGIC_VECTOR (15 downto 0);
            ex_mem_write_data :  in  STD_LOGIC_VECTOR (15 downto 0);
            stall :              in  STD_LOGIC;
            clk :                in  STD_LOGIC;
@@ -224,6 +225,65 @@ component EX_MEM
 		   mem_reg_data:        out  STD_LOGIC_VECTOR(15 downto 0);
            mem_mem_addr :       out  STD_LOGIC_VECTOR (15 downto 0);
            mem_mem_write_data : out  STD_LOGIC_VECTOR (15 downto 0));
+end component;
+
+component MEM
+	Port (
+		--指令的类别
+		op_type_in : in STD_LOGIC_VECTOR (2 downto 0);
+		--写使能
+		reg_write_in : in STD_LOGIC;
+		reg_addr_in : in STD_LOGIC_VECTOR(3 downto 0);
+		--写入寄存器的数据
+		reg_data_in : in STD_LOGIC_VECTOR(15 downto 0);
+		--读/写的内存地址
+		mem_addr_in : in STD_LOGIC_VECTOR(15 downto 0);
+		--写入内存的数据
+		mem_write_data_in : in STD_LOGIC_VECTOR(15 downto 0);
+		mem_read_data_in : in STD_LOGIC_VECTOR(15 downto 0);
+		rst : in STD_LOGIC;
+
+		reg_write_out : out STD_LOGIC;
+		reg_addr_out : out STD_LOGIC_VECTOR(3 downto 0);
+		reg_data_out : out STD_LOGIC_VECTOR(15 downto 0);
+
+		--读/写内存地址
+		mem_addr_out : out STD_LOGIC_VECTOR(15 downto 0);
+		--写入内存的数据
+		mem_data_out : out STD_LOGIC_VECTOR(15 downto 0);
+		--操作ram1读写的两个使能端口
+		mem_we_out : out STD_LOGIC;
+		mem_ce_out : out STD_LOGIC);
+end component;
+
+component MEM_WB
+	Port(
+		rst : in STD_LOGIC;
+		clk : in STD_LOGIC;
+		stall : in STD_LOGIC_VECTOR(4 downto 0);
+		--写使能端
+		mem_reg_write : in STD_LOGIC;
+		--写的寄存器编号
+		mem_reg_addr : in STD_LOGIC_VECTOR(3 downto 0);
+		mem_reg_data : in STD_LOGIC_VECTOR(15 downto 0);
+		wb_reg_addr : out STD_LOGIC_VECTOR(3 downto 0);
+		wb_reg_data : out STD_LOGIC_VECTOR(15 downto 0);
+		wb_reg_write : out STD_LOGIC);
+end component;
+
+component REG
+	Port(	rst:		in		STD_LOGIC;
+			clk:		in		STD_LOGIC;
+			re1:		in		STD_LOGIC;
+			raddr1:	in		STD_LOGIC_VECTOR(3 downto 0);
+			re2:		in 	STD_LOGIC;
+			raddr2:	in 	STD_LOGIC_VECTOR(3 downto 0);
+			we:		in		STD_LOGIC;
+			waddr:	in		STD_LOGIC_VECTOR(3 downto 0);
+			wdata:	in		STD_LOGIC_VECTOR(15 downto 0);
+			
+			rdata1:	out 	STD_LOGIC_VECTOR(15 downto 0);
+			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0));
 end component;
 
 begin
@@ -253,7 +313,17 @@ begin
 
     EX_MEM_component: EX_MEM port map(rst=>rst, clk=>clk, ex_op_type=>ex_op_type_out, ex_reg_write=>ex_reg_write_out, ex_reg_addr=>ex_reg_addr_out,ex_reg_data=>ex_reg_data_out,
                                       ex_mem_addr=>ex_mem_addr_out, ex_mem_write_data=>ex_mem_write_data_out,
-                                      mem_op_type=>ex_op_type_out, mem_reg_write=>ex_reg_write_out, mem_reg_addr=>ex_reg_addr_out, mem_reg_data=>ex_reg_data_out,
-                                      mem_mem_addr=>ex_mem_addr_out, mem_mem_write_data=>ex_mem_write_data_out);
+                                      mem_op_type=>mem_op_type_in, mem_reg_write=>mem_reg_write_in, mem_reg_addr=>mem_reg_addr_in, mem_reg_data=>mem_reg_data_in,
+                                      mem_mem_addr=>mem_mem_addr_in, mem_mem_write_data=>mem_mem_write_data_in);
+
+    MEM_component: MEM port map(rst=>rst, op_type_in=>mem_op_type_in,reg_write_in=>mem_reg_write_in, reg_addr_in=>mem_reg_addr_in, reg_data_in=>mem_reg_data_in,
+                                mem_write_data_int=>mem_mem_write_data_in,reg_write_out=>mem_reg_write_out, reg_addr_out=>mem_reg_addr_out,
+                                reg_data_out=>mem_reg_data_out, mem_addr_out=>mem_addr_out, mem_data_out=>mem_data_out, mem_we_out=>mem_we_out, mem_ce_out=>mem_ce_out);
+
+    MEM_WB_component: MEM_WB port map(rst=>rst, clk=>clk, stall=>stall, mem_reg_write=>mem_reg_write_out, mem_reg_addr=>mem_reg_addr_out,
+                                      mem_reg_data=>mem_reg_data_out,wb_reg_addr=>wb_reg_addr_in,wb_reg_data=>wb_reg_data_in);
+
+    REG_component: REG port map(rst=>rst, clk=>clk, re1=>id_reg1_read_out, raddr1=>id_reg1_addr_out, re2=>id_reg2_read_out, raddr2=>id_reg2_addr_out,
+                                we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in);
 end Behavioral;
 

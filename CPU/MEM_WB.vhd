@@ -32,22 +32,22 @@ use WORK.DEFINES.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity mem_wb is 
+entity MEM_WB is 
 	Port(
 		rst : in STD_LOGIC;
 		clk : in STD_LOGIC;
 		stall : in STD_LOGIC_VECTOR(4 downto 0);
 		--写使能端
-		mem_write_reg : in STD_LOGIC;
+		mem_reg_write : in STD_LOGIC;
 		--写的寄存器编号
-		mem_write_reg_addr : in STD_LOGIC_VECTOR(3 downto 0);
-		mem_write_reg_data : in STD_LOGIC_VECTOR(15 downto 0);
-		wb_write_reg_addr : out STD_LOGIC_VECTOR(3 downto 0);
-		wb_write_reg_data : out STD_LOGIC_VECTOR(15 downto 0);
-		wb_write_reg : out STD_LOGIC);
-end mem_wb;
+		mem_reg_addr : in STD_LOGIC_VECTOR(3 downto 0);
+		mem_reg_data : in STD_LOGIC_VECTOR(15 downto 0);
+		wb_reg_addr : out STD_LOGIC_VECTOR(3 downto 0);
+		wb_reg_data : out STD_LOGIC_VECTOR(15 downto 0);
+		wb_reg_write : out STD_LOGIC);
+end MEM_WB;
 
-architecture Behavioral of mem_wb is
+architecture Behavioral of MEM_WB is
 
 begin
 
@@ -55,13 +55,13 @@ begin
 	begin
 		if(rising_edge(clk)) then
 			if(rst = RstEnable) then
-				wb_write_reg_data <= mem_write_reg_data;
-				wb_write_reg_addr  <= ZERO_REGISTER;
-				wb_write_reg <= WriteDisable;
+				wb_reg_data <= mem_reg_data;
+				wb_reg_addr  <= ZERO_REGISTER;
+				wb_reg_write <= WriteDisable;
 			else
-				wb_write_reg_data <= ZeroWord;
-				wb_write_reg_addr  <= mem_write_reg_addr;
-				wb_write_reg <= mem_write_reg;
+				wb_reg_data <= ZeroWord;
+				wb_reg_addr  <= mem_reg_addr;
+				wb_reg_write <= mem_reg_write;
 			end if;
 		end if;
 	end process;
