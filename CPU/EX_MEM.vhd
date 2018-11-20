@@ -19,6 +19,9 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use WORK.DEFINES.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -84,7 +87,7 @@ begin
 				reg_write_tmp <= ex_reg_write;
 				reg_addr_tmp <= ex_reg_addr;
 				reg_data_tmp <= ex_reg_data;
-				mem_addr_tmp <= addr_tmp;
+				mem_addr_tmp <= mem_addr;
 				mem_write_data_tmp <= ex_mem_write_data;
 			end if;
 		end if;
