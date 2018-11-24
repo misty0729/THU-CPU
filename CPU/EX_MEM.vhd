@@ -65,7 +65,7 @@ begin
 	mem_mem_addr <= mem_addr_tmp;
 	mem_mem_write_data <= mem_write_data_tmp;
 	
-	main: process(clk, rst, stall) is
+	main: process(clk, rst, stall, ex_op_type, ex_reg_write, ex_reg_addr, ex_reg_data, ex_mem_addr, ex_mem_write_data) is
 	begin
 		if rising_edge(clk) then
 			if rst = RstEnable then
