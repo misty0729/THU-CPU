@@ -67,15 +67,15 @@ begin
 	
 	main: process(clk, rst, stall) is
 	begin
-		if rst = RstEnable then
-			op_type_tmp <= "000";
-			reg_write_tmp <= '0';
-			reg_addr_tmp <= "0000";
-			reg_data_tmp <= ZeroWord;
-			mem_addr_tmp <= ZeroWord;
-			mem_write_data_tmp <= ZeroWord;
-		elsif rising_edge(clk) then
-			if stall(3)=Stop and stall(4)=NoStop then
+		if rising_edge(clk) then
+			if rst = RstEnable then
+				op_type_tmp <= "000";
+				reg_write_tmp <= '0';
+				reg_addr_tmp <= "0000";
+				reg_data_tmp <= ZeroWord;
+				mem_addr_tmp <= ZeroWord;
+				mem_write_data_tmp <= ZeroWord;
+			elsif stall(3)=Stop and stall(4)=NoStop then
 				op_type_tmp <= "000";
 				reg_write_tmp <= '0';
 				reg_addr_tmp <= "0000";
