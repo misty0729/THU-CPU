@@ -246,7 +246,7 @@ begin
 								case subsubop is
 									when "0010" => --SLT  11101 rx ry 000 10
 										op_temp						<= EXE_SLT_OP;
-										op_type_out					<=	EXE_LOGIC_TYPE;
+										op_type_out					<=	EXE_ARITH_TYPE;
 										reg1_read_temp				<= ReadEnable;
 										reg1_addr_temp				<= x;
 										reg2_read_temp				<= ReadEnable;
@@ -256,7 +256,7 @@ begin
 										
 									when "0011" => --SLTU 11101 rx ry 000 11
 										op_temp						<= EXE_SLTU_OP;
-										op_type_out					<=	EXE_LOGIC_TYPE;
+										op_type_out					<=	EXE_ARITH_TYPE;
 										reg1_read_temp				<= ReadEnable;
 										reg1_addr_temp				<= x;
 										reg2_read_temp				<= ReadEnable;
@@ -355,7 +355,7 @@ begin
 											when "0010" =>	 --MFPC  11101 rx 010 000 00
 												op_temp				<=	EXE_MFPC_OP;
 												op_type_out			<= EXE_MOVE_TYPE;
-												imm					<= pc_in + "0000000000000001";
+												imm					<= pc_plus_1;
 												reg_write_out		<= WriteEnable;
 												reg_addr_out		<= x;
 												
@@ -376,7 +376,7 @@ begin
 												op_type_out			<= EXE_JUMP_TYPE;
 												reg1_read_temp		<= ReadEnable;
 												reg1_addr_temp		<= x;
-												imm					<= pc_in+"0000000000000010";
+												imm					<= pc_plus_1 + "0000000000000001";
 												reg_write_out		<= WriteEnable;
 												reg_addr_out		<= RA_REGISTER;
 												
@@ -479,6 +479,8 @@ begin
 							when "01010" => 		--SLTI  01010 rx imm
 								op_temp								<= EXE_SLTI_OP;
 								op_type_out							<= EXE_ARITH_TYPE;
+								reg1_read_temp						<= ReadEnable;
+								reg1_addr_temp						<= x;
 								imm									<= SXT(imm8,16);
 								reg_write_out						<= WriteEnable;
 								reg_addr_out						<= T_REGISTER;
@@ -486,6 +488,8 @@ begin
 							when "01011" =>		--SLTUI 01011 rx imm
 								op_temp								<= EXE_SLTUI_OP;
 								op_type_out							<= EXE_ARITH_TYPE;
+								reg1_read_temp						<= ReadEnable;
+								reg1_addr_temp						<= x;
 								imm									<= SXT(imm8,16);
 								reg_write_out						<= WriteEnable;
 								reg_addr_out						<= T_REGISTER;
@@ -493,6 +497,8 @@ begin
 							when "01110" =>		--CMPI  01110 rx imm
 								op_temp								<= EXE_CMPI_OP;
 								op_type_out							<= EXE_ARITH_TYPE;
+								reg1_read_temp						<= ReadEnable;
+								reg1_addr_temp						<= x;
 								imm									<= SXT(imm8,16);
 								reg_write_out						<= WriteEnable;
 								reg_addr_out						<= T_REGISTER;
@@ -500,6 +506,7 @@ begin
 							when "00010" =>		--B 	  00010 imm
 								op_temp								<= EXE_B_OP;
 								op_type_out							<= EXE_BRANCH_TYPE;
+								imm									<= SXT(imm11,16);
 								
 							
 							when "00100" => 		--BEQZ  00100 rx imm
