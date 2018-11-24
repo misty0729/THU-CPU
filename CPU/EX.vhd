@@ -73,7 +73,7 @@ begin
 		end if;
 	end process nop;
 	
-	arith: process(rst, op_in) is
+	arith: process(rst, op_in, reg1_data_in, reg2_data_in) is
 	begin
 		if rst = RstEnable then
 			arith_out := ZeroWord;
@@ -144,7 +144,7 @@ begin
 		end if;
 	end process arith;
 	
-	logic: process(rst, op_in) is
+	logic: process(rst, op_in, reg1_data_in, reg2_data_in) is
 	begin
       if rst = RstEnable then
         logic_out := ZeroWord;
@@ -205,7 +205,7 @@ begin
 		branch_out := ZeroWord;
 	end process branch;
 	
-	jump: process(rst, op_in) is
+	jump: process(rst, op_in, reg2_data_in) is
 	begin
 		if rst = RstEnable then
 			jump_out := ZeroWord;
@@ -219,7 +219,7 @@ begin
 		end if;
 	end process jump;
 	
-	load: process(rst, op_in) is
+	load: process(rst, op_in, reg1_data_in, reg2_data_in) is
 	begin
 		if rst = RstEnable then
 			load_out := ZeroWord;
@@ -228,7 +228,7 @@ begin
 		end if;
 	end process load;
 	
-	move: process(rst, op_in) is
+	move: process(rst, op_in, reg1_data_in) is
 	begin
 		if rst = RstEnable then
 			move_out := ZeroWord;
@@ -237,7 +237,7 @@ begin
 		end if;
 	end process move;
 	
-	store: process(rst, op_in) is
+	store: process(rst, op_in, reg1_data_in, reg2_data_in) is
 	begin
 		if rst = RstEnable then
 			store_out := ZeroWord;
@@ -246,7 +246,7 @@ begin
 		end if;
 	end process store;
 	
-	output: process(op_type_in) is
+	output: process(op_type_in, reg_write_in, reg_addr_in, mem_write_data_in) is
 	begin
 		op_type_out <= op_type_in;
 		reg_write_out <= reg_write_in;
