@@ -411,6 +411,8 @@ begin
 								op_type_out							<= EXE_STORE_TYPE;
 								reg1_read_temp						<= ReadEnable;
 								reg1_addr_temp						<= SP_REGISTER;
+								reg2_read_temp						<= ReadEnable;
+								reg2_addr_temp						<= x;
 								imm									<= SXT(imm8,16);
 								
 							when "11011" =>		--SW	  11011 rx ry imm
@@ -418,6 +420,8 @@ begin
 								op_type_out							<= EXE_STORE_TYPE;
 								reg1_read_temp						<= ReadEnable;
 								reg1_addr_temp						<= x;
+								reg2_read_temp						<= ReadEnable;
+								reg2_addr_temp						<= y;
 								imm									<= SXT(imm5,16);
 								
 							when "10010" =>		--LW_SP 10010 rx imm
