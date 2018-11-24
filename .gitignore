@@ -5,3 +5,4 @@
 !/CPU/
 !.gitignore
 !*.vhd
+!*.ucf
