@@ -54,7 +54,7 @@ end ID_EX;
 
 architecture Behavioral of ID_EX is
 begin
-    main:   process(rst, clk)
+    main:   process(clk)
             begin
                 if (rising_edge(clk)) then
                     if (rst = RstEnable) then
