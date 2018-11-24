@@ -246,7 +246,7 @@ begin
 		end if;
 	end process store;
 	
-	output: process(op_type_in, reg_write_in, reg_addr_in, mem_write_data_in) is
+	output: process(op_type_in, reg_write_in, reg_addr_in, mem_write_data_in, nop_out, arith_out, logic_out, branch_out, jump_out, load_out, move_out, store_out) is
 	begin
 		op_type_out <= op_type_in;
 		reg_write_out <= reg_write_in;
