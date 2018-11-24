@@ -107,6 +107,8 @@ begin
 						reg1_addr_temp 				<= ZERO_REGISTER;
 						reg2_read_temp 				<= ReadDisable;
 						reg2_addr_temp 				<= ZERO_REGISTER;
+						imm                        <= ZeroWord;
+                  pc_plus_1                  <= "0000000000000001";
 					else
 						op 		:= inst_in(15 downto 11);
 						subop		:=	inst_in(1 downto 0);
@@ -129,8 +131,8 @@ begin
 						reg1_addr_temp 				<= ZERO_REGISTER;
 						reg2_read_temp 				<= ReadDisable;
 						reg2_addr_temp 				<= ZERO_REGISTER;
-                        imm                         <= ZeroWord;
-                        pc_plus_1                   <= pc_in + "0000000000000001";
+                  imm                        <= ZeroWord;
+                  pc_plus_1                  <= pc_in + "0000000000000001";
 						case op is
 							when "00110" =>
 								case subop is
@@ -521,7 +523,7 @@ begin
 					end if;
 				end process;
 				
-    Get_reg1_data_temp:     process(rst, reg1_read_temp, reg1_addr_temp, ex_op_type_in, ex_reg_write_in, ex_reg_addr_in, ex_reg_data_in, mem_reg_write_in, mem_reg_addr_in, mem_reg_data_in)
+    Get_reg1_data_temp:     process(rst, reg1_data_in, reg1_read_temp, reg1_addr_temp, ex_op_type_in, ex_reg_write_in, ex_reg_addr_in, ex_reg_data_in, mem_reg_write_in, mem_reg_addr_in, mem_reg_data_in)
                             begin
                                 if (rst = RstEnable) then 
                                     reg1_data_temp <= ZeroWord;
@@ -538,7 +540,7 @@ begin
                                 end if;
                             end process;
     
-    Get_reg2_data_temp:     process(rst, reg2_read_temp, reg2_addr_temp, ex_op_type_in, ex_reg_write_in, ex_reg_addr_in, ex_reg_data_in, mem_reg_write_in, mem_reg_addr_in, mem_reg_data_in)
+    Get_reg2_data_temp:     process(rst, reg2_data_in, reg2_read_temp, reg2_addr_temp, ex_op_type_in, ex_reg_write_in, ex_reg_addr_in, ex_reg_data_in, mem_reg_write_in, mem_reg_addr_in, mem_reg_data_in)
                             begin
                                 if (rst = RstEnable) then 
                                     reg2_data_temp <= ZeroWord;
@@ -627,7 +629,7 @@ begin
                                 end if;
                             end process;
 
-    Get_stall_req_out:      process(rst, reg1_read_temp, reg1_addr_temp, reg2_read_temp, reg2_addr_temp, ex_op_type_in, ex_reg_addr_in)
+    Get_stall_req_out:      process(rst, reg1_read_temp, reg1_addr_temp, reg2_read_temp, reg2_addr_temp, ex_op_type_in, ex_reg_addr_in, ex_reg_write_in)
                             begin
                                 if (rst = RstEnable) then
                                     stallreq_out <= NoStop;

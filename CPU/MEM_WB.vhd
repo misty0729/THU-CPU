@@ -36,7 +36,7 @@ entity MEM_WB is
 	Port(
 		rst : in STD_LOGIC;
 		clk : in STD_LOGIC;
-		stall : in STD_LOGIC_VECTOR(4 downto 0);
+		stall : in STD_LOGIC_VECTOR(5 downto 0);
 		--写使能端
 		mem_reg_write : in STD_LOGIC;
 		--写的寄存器编号
@@ -53,15 +53,19 @@ begin
 
 	process(clk)
 	begin
-		if(rising_edge(clk)) then
-			if(rst = RstEnable) then
-				wb_reg_data <= mem_reg_data;
-				wb_reg_addr  <= ZERO_REGISTER;
+		if (rising_edge(clk)) then
+			if (rst = RstEnable) then
 				wb_reg_write <= WriteDisable;
-			else
+				wb_reg_addr <= ZERO_REGISTER;
 				wb_reg_data <= ZeroWord;
-				wb_reg_addr  <= mem_reg_addr;
+			elsif(stall(4)=Stop and stall(5)=NoStop) then
+				wb_reg_write <= WriteDisable;
+				wb_reg_addr <= ZERO_REGISTER;
+				wb_reg_data <= ZeroWord;
+			elsif (stall(4)=NoStop) then
 				wb_reg_write <= mem_reg_write;
+				wb_reg_addr  <= mem_reg_addr;
+				wb_reg_data <= mem_reg_data;
 			end if;
 		end if;
 	end process;

@@ -32,16 +32,16 @@ use WORK.DEFINES.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity RAM1 is
+entity RAM is
 	Port(	ce:			in		STD_LOGIC;
 			we:			in		STD_LOGIC;
 			data_in:	in		STD_LOGIC_VECTOR (15 downto 0);
 			addr:		in  	STD_LOGIC_VECTOR (15 downto 0);
 			clk:		in  	STD_LOGIC;
 			data_out: 	out  	STD_LOGIC_VECTOR (15 downto 0));
-end RAM1;
+end RAM;
 
-architecture Behavioral of RAM1 is
+architecture Behavioral of RAM is
 begin
 	process(clk)
 		begin

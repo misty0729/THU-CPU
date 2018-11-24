@@ -44,14 +44,26 @@ entity REG is
 			wdata:	in		STD_LOGIC_VECTOR(15 downto 0);
 			
 			rdata1:	out 	STD_LOGIC_VECTOR(15 downto 0);
-			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0));
+			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0);
+			
+			led:		out 	STD_LOGIC_VECTOR(15 downto 0));
 end REG;
 
 architecture Behavioral of REG is
-	type REGS IS array (11 downto 0) of STD_LOGIC_VECTOR (15 downto 0);
+	type REGS IS array (15 downto 0) of STD_LOGIC_VECTOR (15 downto 0);
 	signal   regist:	REGS	:=(others => ZeroWord);
 begin
-	Write:	process(clk)
+
+	led(15 downto 14) <= regist(7)(1 downto 0);
+	led(13 downto 12) <= regist(6)(1 downto 0);
+	led(11 downto 10) <= regist(5)(1 downto 0);
+	led(9 downto 8) <= regist(4)(1 downto 0);
+	led(7 downto 6) <= regist(3)(1 downto 0);
+	led(5 downto 4) <= regist(2)(1 downto 0);
+	led(3 downto 2) <= regist(1)(1 downto 0);
+	led(1 downto 0) <= regist(0)(1 downto 0);
+	
+	Write1:	process(clk)
 				begin
 					if (rising_edge(clk)) then
 						if (rst = RstDisable) then
@@ -62,7 +74,7 @@ begin
 					end if;
 				end process;
 				
-	Read1:	process(rst, re1, raddr1, we, waddr, wdata)
+	Read1:	process(rst, re1, raddr1, we, waddr, wdata, regist)
 				begin
 					if (rst = RstDisable) then
 						rdata1 <= ZeroWord;
@@ -79,7 +91,7 @@ begin
 					end if;
 				end process;
 				
-	Read2:	process(rst, re2, raddr2, we, waddr, wdata)
+	Read2:	process(rst, re2, raddr2, we, waddr, wdata, regist)
 				begin
 					if (rst = RstDisable) then
 						rdata2 <= ZeroWord;

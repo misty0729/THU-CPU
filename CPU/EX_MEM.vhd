@@ -37,9 +37,9 @@ entity EX_MEM is
            ex_reg_write : in  STD_LOGIC;
            ex_reg_addr : in  STD_LOGIC_VECTOR (3 downto 0);
            ex_reg_data : in  STD_LOGIC_VECTOR (15 downto 0);
-           mem_addr : in  STD_LOGIC_VECTOR (15 downto 0);
+           ex_mem_addr : in  STD_LOGIC_VECTOR (15 downto 0);
            ex_mem_write_data : in  STD_LOGIC_VECTOR (15 downto 0);
-           stall : in  STD_LOGIC;
+           stall : in  STD_LOGIC_VECTOR(5 downto 0);
            clk : in  STD_LOGIC;
            rst : in  STD_LOGIC;
            mem_op_type : out  STD_LOGIC_VECTOR (2 downto 0);
@@ -75,19 +75,19 @@ begin
 			mem_addr_tmp <= ZeroWord;
 			mem_write_data_tmp <= ZeroWord;
 		elsif rising_edge(clk) then
-			if stall = '1' then
-				op_type_tmp <= op_type_tmp;
-				reg_write_tmp <= reg_write_tmp;
-				reg_addr_tmp <= reg_addr_tmp;
-				reg_data_tmp <= reg_data_tmp;
-				mem_addr_tmp <= mem_addr_tmp;
-				mem_write_data_tmp <= mem_write_data_tmp;
-			else
+			if stall(3)=Stop and stall(4)=NoStop then
+				op_type_tmp <= "000";
+				reg_write_tmp <= '0';
+				reg_addr_tmp <= "0000";
+				reg_data_tmp <= ZeroWord;
+				mem_addr_tmp <= ZeroWord;
+				mem_write_data_tmp <= ZeroWord;
+			elsif stall(3)=NoStop then
 				op_type_tmp <= ex_op_type;
 				reg_write_tmp <= ex_reg_write;
 				reg_addr_tmp <= ex_reg_addr;
 				reg_data_tmp <= ex_reg_data;
-				mem_addr_tmp <= mem_addr;
+				mem_addr_tmp <= ex_mem_addr;
 				mem_write_data_tmp <= ex_mem_write_data;
 			end if;
 		end if;

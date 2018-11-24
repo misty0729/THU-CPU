@@ -35,45 +35,42 @@ use WORK.DEFINES.ALL;
 entity PC is
     Port ( branch_target_addr_in : in  STD_LOGIC_VECTOR (15 downto 0);
            branch_flag_in : in  STD_LOGIC;
-           stall : in  STD_LOGIC;
+           stall : in  STD_LOGIC_VECTOR(5 downto 0);
            clk : in  STD_LOGIC;
            rst : in  STD_LOGIC;
-			  ram_in: in STD_LOGIC_VECTOR (15 downto 0);
-           pc : out  STD_LOGIC_VECTOR (17 downto 0);
-			  data: out STD_LOGIC_VECTOR (15 downto 0);
-           Ram2OE : out  STD_LOGIC;
-           Ram2WE : out  STD_LOGIC;
-           Ram2EN : out  STD_LOGIC);
+           pc : out  STD_LOGIC_VECTOR (15 downto 0);
+			  ce : out  STD_LOGIC);
 end PC;
 
 architecture Behavioral of PC is
-	signal pc_tmp: STD_LOGIC_VECTOR (17 downto 0) := "000000000000000000";
-	signal OE_tmp: STD_LOGIC := '0';
-	signal WE_tmp: STD_LOGIC := '1';
-	signal EN_tmp: STD_LOGIC := '0';
+	signal pc_tmp: STD_LOGIC_VECTOR (15 downto 0) := ZeroWord;
 begin
 	pc <= pc_tmp;
-	Ram2OE <= OE_tmp;
-	Ram2WE <= WE_tmp;
-	Ram2EN <= EN_tmp;
-	data <= ram_in;
 	
 	pc_arr: process(clk, rst, branch_flag_in, branch_target_addr_in) is
 	begin
 		if rst = '0' then
-			pc_tmp <= "000000000000000000";
-			OE_tmp <= '0';
-			WE_tmp <= '1';
-			EN_tmp <= '0';
+			pc_tmp <= ZeroWord;
 		elsif rising_edge(clk) then
-			if branch_flag_in = '1' then
-				pc_tmp <= "00" & branch_target_addr_in;
-			elsif stall = '1' then
+			if stall(0) = Stop then
 				pc_tmp <= pc_tmp;
+			elsif branch_flag_in = '1' then
+				pc_tmp <= branch_target_addr_in;
 			else
 				pc_tmp <= pc_tmp + '1';
 			end if;
 		end if;
 	end process pc_arr;
+	
+	ce_arr: process(clk, rst) is
+	begin
+		if rising_edge(clk) then
+			if rst = RstEnable then
+				ce <= RamDisable;
+			else 
+				ce <= RamEnable;
+			end if;
+		end if;
+	end process;
 end Behavioral;
 

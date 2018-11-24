@@ -63,7 +63,7 @@ end MEM;
 
 architecture Behavioral of MEM is
 begin
-	process(rst,mem_write_data_in,mem_addr_in,op_type_in,mem_read_data_in)
+	process(rst,mem_write_data_in,mem_addr_in,op_type_in,mem_read_data_in, reg_write_in, reg_addr_in, reg_data_in)
 	begin
 		if(rst = RstEnable) then
 			reg_write_out <= WriteDisable;

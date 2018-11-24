@@ -2,9 +2,9 @@
 -- Company: 
 -- Engineer: 
 -- 
--- Create Date:    
+-- Create Date:    21:08:25 11/23/2018 
 -- Design Name: 
--- Module Name:    if_id - Behavioral 
+-- Module Name:    ROM - Behavioral 
 -- Project Name: 
 -- Target Devices: 
 -- Tool versions: 
@@ -32,31 +32,29 @@ use WORK.DEFINES.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity IF_ID is
-	Port(	rst:		in		STD_LOGIC;
-			clk:		in		STD_LOGIC;
-			stall:		in		STD_LOGIC_VECTOR (5 downto 0);
-			if_pc:		in  	STD_LOGIC_VECTOR (15 downto 0);
-			if_inst:	in  	STD_LOGIC_VECTOR (15 downto 0);
-			id_pc: 		out  	STD_LOGIC_VECTOR (15 downto 0);
-			id_inst:	out 	STD_LOGIC_VECTOR (15 downto 0));
-end IF_ID;
+entity ROM is
+Port(addr   :   in  STD_LOGIC_VECTOR(15 downto 0);
+     ce     :   in  STD_LOGIC;
+     data   :   out STD_LOGIC_VECTOR(15 downto 0));
+end ROM;
 
-architecture Behavioral of IF_ID is
+architecture Behavioral of ROM is
+constant InstNum : integer :=100;
+type InstArray is array (0 to InstNum) of STD_LOGIC_VECTOR(15 downto 0);
+signal insts: InstArray :=(
+    "0100100100000001",--ADDIU R1 1
+    "0100000101000010",--ADDIU3 R1 R2 2
+    "1110000101001101",--ADDU R1 R2 R3
+    others => "0000000000000000"
+);
 begin
-	process(clk)
-		begin
-			if (rising_edge(clk)) then
-				if (rst = RstEnable) then
-					id_pc <= ZeroWord;
-					id_inst <= ZeroWord;
-				elsif (stall(0) = Stop and stall(1) = NoStop) then
-					id_pc <= ZeroWord;
-					id_inst <= ZeroWord;
-				elsif (stall(0) = NoStop) then
-					id_pc <= if_pc;
-					id_inst <= if_inst;
+    main: process(ce, addr, insts)
+          begin
+            if (ce = ReadEnable) then
+                data <= insts(conv_integer(addr(3 downto 0)));
+            else
+                data <= ZeroWord;
 				end if;
-			end if;
-		end process;
+          end process;
 end Behavioral;
+

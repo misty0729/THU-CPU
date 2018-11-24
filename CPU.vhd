@@ -39,23 +39,22 @@ entity CPU is
            ram_ce : out  STD_LOGIC;
            ram_we : out  STD_LOGIC;
            ram_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
-           ram_addr : out  STD_LOGIC_VECTOR (15 downto 0));
+           ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
+           led : out STD_LOGIC_VECTOR (15 downto 0));
 end CPU;
 
 architecture Behavioral of CPU is
 
 --CTRL_NEED
-signal stall_req_from_id: STD_LOGIC;
 
 --CTRL_PROVIDE
-signal stall: STD_LOGIC_VECTOR(15 downto 0);
+signal stall: STD_LOGIC_VECTOR(5 downto 0);
 
 --IF_NEED
 
 
 --IF_PROVIDE
-signal if_pc_out: STD_LOGIC_VECTOR(15 downto 0);
-signal if_ce_out: STD_LOGIC_VECTOR(15 downto 0);
+signal pc_tmp : STD_LOGIC_VECTOR(15 downto 0);
 
 --ID_NEED
 signal id_pc_in: STD_LOGIC_VECTOR(15 downto 0);
@@ -81,6 +80,8 @@ signal id_reg2_read_out: STD_LOGIC;
 signal id_reg1_addr_out: STD_LOGIC_VECTOR(3 downto 0);
 signal id_reg2_addr_out: STD_LOGIC_VECTOR(3 downto 0);
 
+signal id_stallreq_out: STD_LOGIC;
+
 --EX_NEED
 signal ex_op_in: STD_LOGIC_VECTOR(5 downto 0);
 signal ex_op_type_in: STD_LOGIC_VECTOR(2 downto 0);
@@ -104,6 +105,7 @@ signal mem_reg_write_in: STD_LOGIC;
 signal mem_reg_addr_in: STD_LOGIC_VECTOR(3 downto 0);
 signal mem_reg_data_in: STD_LOGIC_VECTOR(15 downto 0);
 signal mem_mem_addr_in: STD_LOGIC_VECTOR(15 downto 0);
+
 signal mem_mem_write_data_in: STD_LOGIC_VECTOR(15 downto 0);
 
 --MEM_PROVIDE
@@ -111,32 +113,28 @@ signal mem_reg_write_out: STD_LOGIC;
 signal mem_reg_addr_out: STD_LOGIC_VECTOR(3 downto 0);
 signal mem_reg_data_out: STD_LOGIC_VECTOR(15 downto 0);
 
-signal mem_ce_out: STD_LOGIC;
-signal mem_we_out: STD_LOGIC;
-signal mem_addr_out: STD_LOGIC;
-signal mem_data_out: STD_LOGIC;
-
 --WB_NEED
 signal wb_reg_write_in: STD_LOGIC;
 signal wb_reg_addr_in: STD_LOGIC_VECTOR(3 downto 0);
 signal wb_reg_data_in: STD_LOGIC_VECTOR(15 downto 0);
 
 
+
 component PC
     Port ( branch_target_addr_in :  in  STD_LOGIC_VECTOR (15 downto 0);
            branch_flag_in :         in  STD_LOGIC;
-           stall :                  in  STD_LOGIC_VECTOR(15 downto 0);
+           stall :                  in  STD_LOGIC_VECTOR(5 downto 0);
            clk :                    in  STD_LOGIC;
            rst :                    in  STD_LOGIC;
-           pc :                     out STD_LOGIC_VECTOR (17 downto 0);
+           pc :                     out STD_LOGIC_VECTOR (15 downto 0);
 		   ce:                      out STD_LOGIC);
 end component;
 
 component IF_ID 
 	Port(	rst:		in		STD_LOGIC;
 			clk:		in		STD_LOGIC;
-			stall:		in		STD_LOGIC;
-			if_pc:		in  	STD_LOGIC_VECTOR (4 downto 0);
+			stall:		in		STD_LOGIC_VECTOR (5 downto 0);
+			if_pc:		in  	STD_LOGIC_VECTOR (15 downto 0);
 			if_inst:	in  	STD_LOGIC_VECTOR (15 downto 0);
 			id_pc: 		out  	STD_LOGIC_VECTOR (15 downto 0);
 			id_inst:	out 	STD_LOGIC_VECTOR (15 downto 0));
@@ -216,7 +214,7 @@ component EX_MEM
            ex_reg_data :        in  STD_LOGIC_VECTOR (15 downto 0);
            ex_mem_addr :        in  STD_LOGIC_VECTOR (15 downto 0);
            ex_mem_write_data :  in  STD_LOGIC_VECTOR (15 downto 0);
-           stall :              in  STD_LOGIC;
+           stall :              in  STD_LOGIC_VECTOR (5 downto 0);
            clk :                in  STD_LOGIC;
            rst :                in  STD_LOGIC;
            mem_op_type :        out  STD_LOGIC_VECTOR (2 downto 0);
@@ -260,7 +258,7 @@ component MEM_WB
 	Port(
 		rst : in STD_LOGIC;
 		clk : in STD_LOGIC;
-		stall : in STD_LOGIC_VECTOR(4 downto 0);
+		stall : in STD_LOGIC_VECTOR(5 downto 0);
 		--写使能端
 		mem_reg_write : in STD_LOGIC;
 		--写的寄存器编号
@@ -283,27 +281,37 @@ component REG
 			wdata:	in		STD_LOGIC_VECTOR(15 downto 0);
 			
 			rdata1:	out 	STD_LOGIC_VECTOR(15 downto 0);
-			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0));
+			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0);
+            
+            led:    out     STD_LOGIC_VECTOR(15 downto 0));
 end component;
 
+component CTRL
+    Port ( rst              : in  STD_LOGIC;
+           stallreq_from_id : in  STD_LOGIC;
+           stall            : out  STD_LOGIC_VECTOR (5 downto 0));
+end component;
 begin
-    PC_component: PC port map(rst=>rst, clk=>clk, stall=>stall, branch_flag_in=>id_branch_flag_out,branch_target_addr_in=>id_branch_target_addr_out,pc=>if_pc_out,ce=>if_ce_out);
-    
-    IF_ID_component: IF_ID port map(rst=>rst, clk=>clk, stall=>stall, if_pc=>if_pc_out, if_inst=>rom_read_data_in, id_pc=>id_pc_in, id_inst=>id_inst_in);
+	 rom_addr<=pc_tmp;
+	
+    PC_component: PC port map(rst=>rst, clk=>clk, stall=>stall, branch_flag_in=>id_branch_flag_out,branch_target_addr_in=>id_branch_target_addr_out,pc=>pc_tmp,ce=>rom_ce);
+
+    IF_ID_component: IF_ID port map(rst=>rst, clk=>clk, stall=>stall, if_pc=>pc_tmp, if_inst=>rom_read_data_in, id_pc=>id_pc_in, id_inst=>id_inst_in);
     
     ID_component: ID port map(rst=>rst, pc_in=>id_pc_in, inst_in=>id_inst_in, reg1_data_in=>id_reg1_data_in, reg2_data_in=>id_reg2_data_in, 
                             ex_op_type_in=>ex_op_type_out, ex_reg_write_in=>ex_reg_write_out, ex_reg_addr_in=>ex_reg_addr_out, ex_reg_data_in=>ex_reg_data_out,
                             mem_reg_write_in=>mem_reg_write_out, mem_reg_addr_in=>mem_reg_addr_out, mem_reg_data_in=>mem_reg_data_out,
                             op_out=>id_op_out, op_type_out=>id_op_type_out, reg1_data_out=>id_reg1_data_out, reg2_data_out=>id_reg2_data_out,
-                            reg_write_out=>id_reg_write_out, reg_addr_out=>id_reg1_addr_out, mem_write_data_out=>id_mem_write_data_out,
+                            reg_write_out=>id_reg_write_out, reg_addr_out=>id_reg_addr_out, 
                             mem_write_data_out=>id_mem_write_data_out, branch_flag_out=>id_branch_flag_out, branch_target_addr_out=>id_branch_target_addr_out,
                             reg1_read_out=>id_reg1_read_out, reg1_addr_out=>id_reg1_addr_out, reg2_read_out=>id_reg2_read_out,reg2_addr_out=>id_reg2_addr_out,
-                            stallreq_out=>stall_req_from_id);
+                            stallreq_out=>id_stallreq_out);
 
     ID_EX_component: ID_EX port map(rst=>rst, clk=>clk, id_op=>id_op_out, id_op_type=>id_op_type_out, id_reg1_data=>id_reg1_data_out,id_reg2_data=>id_reg2_data_out,
                                     id_reg_write=>id_reg_write_out, id_reg_addr=>id_reg_addr_out, id_mem_write_data=>id_mem_write_data_out,
                                     ex_op=>ex_op_in, ex_op_type=>ex_op_type_in, ex_reg1_data=>ex_reg1_data_in, ex_reg2_data=>ex_reg2_data_in,
-                                    ex_reg_write=>ex_reg_write_in, ex_reg_addr=>ex_reg_addr_in, ex_mem_write_data=>ex_mem_write_data_in);
+                                    ex_reg_write=>ex_reg_write_in, ex_reg_addr=>ex_reg_addr_in, ex_mem_write_data=>ex_mem_write_data_in,
+												stall=>stall);
     
     EX_component: EX port map(rst=>rst, op_in=>ex_op_in, op_type_in=>ex_op_type_in,
                               reg1_data_in=>ex_reg1_data_in, reg2_data_in=>ex_reg2_data_in, reg_write_in=>ex_reg_write_in, reg_addr_in=>ex_reg_addr_in,
@@ -314,16 +322,24 @@ begin
     EX_MEM_component: EX_MEM port map(rst=>rst, clk=>clk, ex_op_type=>ex_op_type_out, ex_reg_write=>ex_reg_write_out, ex_reg_addr=>ex_reg_addr_out,ex_reg_data=>ex_reg_data_out,
                                       ex_mem_addr=>ex_mem_addr_out, ex_mem_write_data=>ex_mem_write_data_out,
                                       mem_op_type=>mem_op_type_in, mem_reg_write=>mem_reg_write_in, mem_reg_addr=>mem_reg_addr_in, mem_reg_data=>mem_reg_data_in,
-                                      mem_mem_addr=>mem_mem_addr_in, mem_mem_write_data=>mem_mem_write_data_in);
+                                      mem_mem_addr=>mem_mem_addr_in, mem_mem_write_data=>mem_mem_write_data_in,
+												  stall=>stall);
 
-    MEM_component: MEM port map(rst=>rst, op_type_in=>mem_op_type_in,reg_write_in=>mem_reg_write_in, reg_addr_in=>mem_reg_addr_in, reg_data_in=>mem_reg_data_in,
-                                mem_write_data_int=>mem_mem_write_data_in,reg_write_out=>mem_reg_write_out, reg_addr_out=>mem_reg_addr_out,
-                                reg_data_out=>mem_reg_data_out, mem_addr_out=>mem_addr_out, mem_data_out=>mem_data_out, mem_we_out=>mem_we_out, mem_ce_out=>mem_ce_out);
+    MEM_component: MEM port map(rst=>rst, op_type_in=>mem_op_type_in,reg_write_in=>mem_reg_write_in, reg_addr_in=>mem_reg_addr_in, reg_data_in=>mem_reg_data_in, mem_addr_in=>mem_mem_addr_in,
+                                mem_write_data_in=>mem_mem_write_data_in,reg_write_out=>mem_reg_write_out, reg_addr_out=>mem_reg_addr_out,
+                                reg_data_out=>mem_reg_data_out, mem_addr_out=>ram_addr, mem_data_out=>ram_write_data_out, mem_we_out=>ram_we, mem_ce_out=>ram_ce,
+										  mem_read_data_in=>ram_read_data_in);
 
-    MEM_WB_component: MEM_WB port map(rst=>rst, clk=>clk, stall=>stall, mem_reg_write=>mem_reg_write_out, mem_reg_addr=>mem_reg_addr_out,
-                                      mem_reg_data=>mem_reg_data_out,wb_reg_addr=>wb_reg_addr_in,wb_reg_data=>wb_reg_data_in);
+    
+    
+    MEM_WB_component: MEM_WB port map(rst=>rst, clk=>clk, stall=>stall, 
+												  mem_reg_write=>mem_reg_write_out, mem_reg_addr=>mem_reg_addr_out, mem_reg_data=>mem_reg_data_out,
+												  wb_reg_addr=>wb_reg_addr_in,wb_reg_data=>wb_reg_data_in,wb_reg_write=>wb_reg_write_in);
 
     REG_component: REG port map(rst=>rst, clk=>clk, re1=>id_reg1_read_out, raddr1=>id_reg1_addr_out, re2=>id_reg2_read_out, raddr2=>id_reg2_addr_out,
-                                we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in);
+                                we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in,
+										  led=>led);
+
+    CTRL_component: CTRL port map(rst=>rst, stallreq_from_id=>id_stallreq_out, stall=>stall);
 end Behavioral;
 
