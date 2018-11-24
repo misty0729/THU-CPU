@@ -39,7 +39,7 @@ Port(addr   :   in  STD_LOGIC_VECTOR(15 downto 0);
 end ROM;
 
 architecture Behavioral of ROM is
-constant InstNum : integer :=100;
+constant InstNum : integer :=127;
 type InstArray is array (0 to InstNum) of STD_LOGIC_VECTOR(15 downto 0);
 signal insts: InstArray :=(
     "0100100100000001",--ADDIU R1 1
@@ -51,7 +51,7 @@ begin
     main: process(ce, addr, insts)
           begin
             if (ce = ReadEnable) then
-                data <= insts(conv_integer(addr(3 downto 0)));
+                data <= insts(conv_integer(addr(6 downto 0)));
             else
                 data <= ZeroWord;
 				end if;
