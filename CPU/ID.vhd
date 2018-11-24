@@ -142,7 +142,11 @@ begin
 										reg1_read_temp 				<= ReadEnable;
 										reg1_addr_temp 				<= y;
 										reg2_read_temp 				<= ReadDisable;
-										imm			 				<= SXT(imm3,16);
+										if (imm3 = "000") then
+											imm						<= SXT("1000",16);
+										else 
+											imm						<= SXT(imm3,16);
+										end if;
 										reg_write_out 				<= WriteEnable;
 										reg_addr_out  				<= x;
 									when "10" =>	--SRL 00110 rx ry imm 10
@@ -151,7 +155,11 @@ begin
 										reg1_read_temp 				<= ReadEnable;
 										reg1_addr_temp 				<= y;
 										reg2_read_temp 				<= ReadDisable;
-										imm 							<= SXT(imm3,16);
+										if (imm3 = "000") then
+											imm						<= SXT("1000",16);
+										else 
+											imm						<= SXT(imm3,16);
+										end if;
 										reg_write_out 				<= WriteEnable;
 										reg_addr_out  				<= x;
 									when "11" =>	--SRA	00110 rx ry imm 11
@@ -160,7 +168,11 @@ begin
 										reg1_read_temp 				<= ReadEnable;
 										reg1_addr_temp 				<= y;
 										reg2_read_temp 				<= ReadDisable;
-										imm			 				<= SXT(imm3,16);
+										if (imm3 = "000") then
+											imm						<= SXT("1000",16);
+										else 
+											imm						<= SXT(imm3,16);
+										end if;
 										reg_write_out 				<= WriteEnable;
 										reg_addr_out  				<= x;
 									when others =>

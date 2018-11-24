@@ -170,27 +170,15 @@ begin
           when EXE_OR_OP =>
             logic_out <= reg1_data_in or reg2_data_in;
           when EXE_SLL_OP =>
-				if reg2_data_in = ZeroWord then
-					logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SLL 8);
-				else
-					logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SLL CONV_INTEGER(reg2_data_in));
-				end if;
+				logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SLL CONV_INTEGER(reg2_data_in));
           when EXE_SLLV_OP =>
 				logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SLL CONV_INTEGER(reg2_data_in));
           when EXE_SRA_OP =>
-				if reg2_data_in = ZeroWord then
-					logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRA 8);
-				else
-					logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRA CONV_INTEGER(reg2_data_in));
-				end if;
+				logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRA CONV_INTEGER(reg2_data_in));
           when EXE_SRAV_OP =>
 				logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRA CONV_INTEGER(reg2_data_in));
           when EXE_SRL_OP =>
-				if reg2_data_in = ZeroWord then
-					logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRL 8);
-				else
-					logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRL CONV_INTEGER(reg2_data_in));
-				end if;
+				logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRL CONV_INTEGER(reg2_data_in));
           when EXE_SRLV_OP =>
 				logic_out <= TO_STDLOGICVECTOR(TO_BITVECTOR(reg1_data_in) SRL CONV_INTEGER(reg2_data_in));
           when EXE_XOR_OP =>
