@@ -39,11 +39,13 @@ entity IF_ID is
 			if_pc:		in  	STD_LOGIC_VECTOR (15 downto 0);
 			if_inst:	in  	STD_LOGIC_VECTOR (15 downto 0);
 			id_pc: 		out  	STD_LOGIC_VECTOR (15 downto 0);
-			id_inst:	out 	STD_LOGIC_VECTOR (15 downto 0));
+			id_inst:	out 	STD_LOGIC_VECTOR (15 downto 0);
+			dyp1:		out	STD_lOGIC_VECTOR (6 downto 0));
 end IF_ID;
 
 architecture Behavioral of IF_ID is
 begin
+	dyp1 <= if_inst(6 downto 0);
 	process(clk)
 		begin
 			if (rising_edge(clk)) then

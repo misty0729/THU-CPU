@@ -32,8 +32,8 @@ package defines is
 	constant ZeroWord:		STD_LOGIC_VECTOR(15 downto 0)	:="0000000000000000";
 
 	--Enable
-	constant RstEnable:		STD_LOGIC	:='1';
-	constant RstDisable:		STD_LOGIC	:='0';
+	constant RstEnable:		STD_LOGIC	:='0';
+	constant RstDisable:		STD_LOGIC	:='1';
 	constant WriteEnable:	STD_LOGIC	:='1';
 	constant WriteDisable:	STD_LOGIC	:='0';
 	constant ReadEnable:		STD_LOGIC	:='1';

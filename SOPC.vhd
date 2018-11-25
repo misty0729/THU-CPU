@@ -32,7 +32,9 @@ use IEEE.STD_LOGIC_1164.ALL;
 entity SOPC is
     Port ( rst : in  STD_LOGIC;
            clk : in  STD_LOGIC;
-           led : out  STD_LOGIC_VECTOR (15 downto 0));
+           led : out  STD_LOGIC_VECTOR (15 downto 0);
+			  dyp0: out STD_LOGIC_VECTOR(6 downto 0);
+			  dyp1: out STD_LOGIC_VECTOR(6 downto 0));
 end SOPC;
 
 
@@ -64,7 +66,9 @@ component CPU
            ram_we : out  STD_LOGIC;
            ram_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
            ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
-           led: out STD_LOGIC_VECTOR(15 downto 0));
+           led: out STD_LOGIC_VECTOR(15 downto 0);
+			  dyp0: out STD_LOGIC_VECTOR(6 downto 0);
+			  dyp1: out STD_LOGIC_VECTOR(6 downto 0));
 end component;
 
 component ROM 
@@ -85,7 +89,7 @@ end component;
 begin
     CPU_component: CPU port map(clk=>clk, rst=>rst, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
-                                led=>led);
+                                led=>led, dyp0=>dyp0, dyp1=>dyp1);
 
     ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 

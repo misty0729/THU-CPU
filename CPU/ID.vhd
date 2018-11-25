@@ -69,7 +69,9 @@ entity ID is
 			reg2_read_out:				out	STD_LOGIC;
 			reg2_addr_out:				out	STD_LOGIC_VECTOR(3 downto 0);
 			
-			stallreq_out:				out	STD_LOGIC);
+			stallreq_out:				out	STD_LOGIC;
+			dyp0:							out	STD_LOGIC_VECTOR(6 downto 0);
+			led:							out	STD_LOGIC_VECTOR(15 downto 0));
 		
 end ID;
 
@@ -86,7 +88,7 @@ begin
 	reg1_addr_out	<= reg1_addr_temp;
 	reg2_read_out	<= reg2_read_temp;
 	reg2_addr_out	<= reg2_addr_temp;
-	
+	dyp0(5 downto 0) <= op_temp;
 	Decode:	process(rst, pc_in, inst_in)
 				variable op:		STD_LOGIC_VECTOR(4 downto 0);
 				variable subop:	STD_LOGIC_VECTOR(1 downto 0);
@@ -109,6 +111,7 @@ begin
 						reg2_addr_temp 				<= ZERO_REGISTER;
 						imm                        <= ZeroWord;
                   pc_plus_1                  <= "0000000000000001";
+						led <= "1111111111111111";
 					else
 						op 		:= inst_in(15 downto 11);
 						subop		:=	inst_in(1 downto 0);
@@ -121,7 +124,7 @@ begin
 						imm5		:= inst_in(4 downto 0);
 						imm4		:= inst_in(3 downto 0);
 						imm3		:= inst_in(4 downto 2);
-						
+						led <= inst_in;
 						--default value
 						op_temp 						<= EXE_NOP_OP;
 						op_type_out 				<= EXE_NOP_TYPE;

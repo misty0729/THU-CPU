@@ -40,7 +40,9 @@ entity CPU is
            ram_we : out  STD_LOGIC;
            ram_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
            ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
-           led : out STD_LOGIC_VECTOR (15 downto 0));
+           led : out STD_LOGIC_VECTOR (15 downto 0);
+			  dyp1: out STD_LOGIC_VECTOR (6 downto 0);
+			  dyp0: out STD_LOGIC_VECTOR (6 downto 0));
 end CPU;
 
 architecture Behavioral of CPU is
@@ -137,7 +139,8 @@ component IF_ID
 			if_pc:		in  	STD_LOGIC_VECTOR (15 downto 0);
 			if_inst:	in  	STD_LOGIC_VECTOR (15 downto 0);
 			id_pc: 		out  	STD_LOGIC_VECTOR (15 downto 0);
-			id_inst:	out 	STD_LOGIC_VECTOR (15 downto 0));
+			id_inst:	out 	STD_LOGIC_VECTOR (15 downto 0);
+			dyp1:		out	STD_LOGIC_VECTOR (6 downto 0));
 end component;
 
 component ID
@@ -166,7 +169,9 @@ component ID
 			reg1_addr_out:				out	    STD_LOGIC_VECTOR(3 downto 0);
 			reg2_read_out:				out 	STD_LOGIC;
 			reg2_addr_out:				out	    STD_LOGIC_VECTOR(3 downto 0);
-			stallreq_out:				out	    STD_LOGIC);
+			stallreq_out:				out	    STD_LOGIC;
+			dyp0:							out		 STD_LOGIC_VECTOR(6 downto 0);
+			led:							out 		 STD_LOGIC_VECTOR(15 downto 0));
 end component;
 
 component ID_EX
@@ -281,9 +286,7 @@ component REG
 			wdata:	in		STD_LOGIC_VECTOR(15 downto 0);
 			
 			rdata1:	out 	STD_LOGIC_VECTOR(15 downto 0);
-			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0);
-            
-            led:    out     STD_LOGIC_VECTOR(15 downto 0));
+			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0));
 end component;
 
 component CTRL
@@ -296,7 +299,7 @@ begin
 	
     PC_component: PC port map(rst=>rst, clk=>clk, stall=>stall, branch_flag_in=>id_branch_flag_out,branch_target_addr_in=>id_branch_target_addr_out,pc=>pc_tmp,ce=>rom_ce);
 
-    IF_ID_component: IF_ID port map(rst=>rst, clk=>clk, stall=>stall, if_pc=>pc_tmp, if_inst=>rom_read_data_in, id_pc=>id_pc_in, id_inst=>id_inst_in);
+    IF_ID_component: IF_ID port map(rst=>rst, clk=>clk, stall=>stall, if_pc=>pc_tmp, if_inst=>rom_read_data_in, id_pc=>id_pc_in, id_inst=>id_inst_in, dyp1=>dyp1);
     
     ID_component: ID port map(rst=>rst, pc_in=>id_pc_in, inst_in=>id_inst_in, reg1_data_in=>id_reg1_data_in, reg2_data_in=>id_reg2_data_in, 
                             ex_op_type_in=>ex_op_type_out, ex_reg_write_in=>ex_reg_write_out, ex_reg_addr_in=>ex_reg_addr_out, ex_reg_data_in=>ex_reg_data_out,
@@ -305,7 +308,7 @@ begin
                             reg_write_out=>id_reg_write_out, reg_addr_out=>id_reg_addr_out, 
                             mem_write_data_out=>id_mem_write_data_out, branch_flag_out=>id_branch_flag_out, branch_target_addr_out=>id_branch_target_addr_out,
                             reg1_read_out=>id_reg1_read_out, reg1_addr_out=>id_reg1_addr_out, reg2_read_out=>id_reg2_read_out,reg2_addr_out=>id_reg2_addr_out,
-                            stallreq_out=>id_stallreq_out);
+                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>led);
 
     ID_EX_component: ID_EX port map(rst=>rst, clk=>clk, id_op=>id_op_out, id_op_type=>id_op_type_out, id_reg1_data=>id_reg1_data_out,id_reg2_data=>id_reg2_data_out,
                                     id_reg_write=>id_reg_write_out, id_reg_addr=>id_reg_addr_out, id_mem_write_data=>id_mem_write_data_out,
@@ -337,8 +340,8 @@ begin
 												  wb_reg_addr=>wb_reg_addr_in,wb_reg_data=>wb_reg_data_in,wb_reg_write=>wb_reg_write_in);
 
     REG_component: REG port map(rst=>rst, clk=>clk, re1=>id_reg1_read_out, raddr1=>id_reg1_addr_out, re2=>id_reg2_read_out, raddr2=>id_reg2_addr_out,
-                                we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in,
-										  led=>led);
+                                we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in
+										  );
 
     CTRL_component: CTRL port map(rst=>rst, stallreq_from_id=>id_stallreq_out, stall=>stall);
 end Behavioral;

@@ -49,7 +49,7 @@ begin
 	
 	pc_arr: process(clk, rst, branch_flag_in, branch_target_addr_in) is
 	begin
-		if rst = '0' then
+		if rst = RstEnable then
 			pc_tmp <= ZeroWord;
 		elsif rising_edge(clk) then
 			if stall(0) = Stop then

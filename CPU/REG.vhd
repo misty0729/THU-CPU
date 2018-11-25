@@ -44,9 +44,7 @@ entity REG is
 			wdata:	in		STD_LOGIC_VECTOR(15 downto 0);
 			
 			rdata1:	out 	STD_LOGIC_VECTOR(15 downto 0);
-			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0);
-			
-			led:		out 	STD_LOGIC_VECTOR(15 downto 0));
+			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0));
 end REG;
 
 architecture Behavioral of REG is
@@ -54,14 +52,14 @@ architecture Behavioral of REG is
 	signal   regist:	REGS	:=(others => ZeroWord);
 begin
 
-	led(15 downto 14) <= regist(7)(1 downto 0);
-	led(13 downto 12) <= regist(6)(1 downto 0);
-	led(11 downto 10) <= regist(5)(1 downto 0);
-	led(9 downto 8) <= regist(4)(1 downto 0);
-	led(7 downto 6) <= regist(3)(1 downto 0);
-	led(5 downto 4) <= regist(2)(1 downto 0);
-	led(3 downto 2) <= regist(1)(1 downto 0);
-	led(1 downto 0) <= regist(0)(1 downto 0);
+	--led(15 downto 14) <= regist(7)(1 downto 0);
+	--led(13 downto 12) <= regist(6)(1 downto 0);
+	--led(11 downto 10) <= regist(5)(1 downto 0);
+	--led(9 downto 8) <= regist(4)(1 downto 0);
+	--led(7 downto 6) <= regist(3)(1 downto 0);
+	--led(5 downto 4) <= regist(2)(1 downto 0);
+	--led(3 downto 2) <= regist(1)(1 downto 0);
+	--led(1 downto 0) <= regist(0)(1 downto 0);
 	
 	Write1:	process(clk)
 				begin
