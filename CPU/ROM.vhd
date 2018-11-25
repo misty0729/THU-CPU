@@ -50,7 +50,7 @@ signal insts: InstArray :=(
 begin
     main: process(ce, addr, insts)
           begin
-            if (ce = ReadEnable) then
+            if (ce = RamEnable) then
                 data <= insts(conv_integer(addr(6 downto 0)));
             else
                 data <= ZeroWord;

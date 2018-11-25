@@ -47,6 +47,10 @@ end CPU;
 
 architecture Behavioral of CPU is
 
+--DEBUG_NEED
+signal fakeled: STD_LOGIC_VECTOR(15 downto 0);
+
+
 --CTRL_NEED
 
 --CTRL_PROVIDE
@@ -119,8 +123,6 @@ signal mem_reg_data_out: STD_LOGIC_VECTOR(15 downto 0);
 signal wb_reg_write_in: STD_LOGIC;
 signal wb_reg_addr_in: STD_LOGIC_VECTOR(3 downto 0);
 signal wb_reg_data_in: STD_LOGIC_VECTOR(15 downto 0);
-
-
 
 component PC
     Port ( branch_target_addr_in :  in  STD_LOGIC_VECTOR (15 downto 0);
@@ -286,7 +288,8 @@ component REG
 			wdata:	in		STD_LOGIC_VECTOR(15 downto 0);
 			
 			rdata1:	out 	STD_LOGIC_VECTOR(15 downto 0);
-			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0));
+			rdata2:	out 	STD_LOGIC_VECTOR(15 downto 0);
+			led:		out	STD_LOGIC_VECTOR(15 downto 0));
 end component;
 
 component CTRL
@@ -308,7 +311,7 @@ begin
                             reg_write_out=>id_reg_write_out, reg_addr_out=>id_reg_addr_out, 
                             mem_write_data_out=>id_mem_write_data_out, branch_flag_out=>id_branch_flag_out, branch_target_addr_out=>id_branch_target_addr_out,
                             reg1_read_out=>id_reg1_read_out, reg1_addr_out=>id_reg1_addr_out, reg2_read_out=>id_reg2_read_out,reg2_addr_out=>id_reg2_addr_out,
-                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>led);
+                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>fakeled);
 
     ID_EX_component: ID_EX port map(rst=>rst, clk=>clk, id_op=>id_op_out, id_op_type=>id_op_type_out, id_reg1_data=>id_reg1_data_out,id_reg2_data=>id_reg2_data_out,
                                     id_reg_write=>id_reg_write_out, id_reg_addr=>id_reg_addr_out, id_mem_write_data=>id_mem_write_data_out,
@@ -341,7 +344,7 @@ begin
 
     REG_component: REG port map(rst=>rst, clk=>clk, re1=>id_reg1_read_out, raddr1=>id_reg1_addr_out, re2=>id_reg2_read_out, raddr2=>id_reg2_addr_out,
                                 we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in
-										  );
+										  ,led=>led);
 
     CTRL_component: CTRL port map(rst=>rst, stallreq_from_id=>id_stallreq_out, stall=>stall);
 end Behavioral;
