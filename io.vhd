@@ -49,7 +49,7 @@ entity flash_io is
 			  flash_we : out std_logic;
 			  flash_rp : out std_logic;
 			  flash_addr : out std_logic_vector(22 downto 0);
-			  flash_data : inout std_logic_vector(15 downto 0);
+			  flash_data : inout std_logic_vector(15 downto 0)
 			  
            --ctl_read : in  STD_LOGIC
 	);
