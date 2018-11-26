@@ -64,15 +64,24 @@ end RomRam;
 architecture Behavioral of RomRam is
     signal clk_2,clk_4,clk_8:   STD_LOGIC;
     signal ram_read, ram_write: STD_LOGIC;
-    constant load_num : integer :=3;
+    constant load_num : integer :=15;
     constant inst_num : integer :=127;
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
     signal   load_finish_temp:   STD_LOGIC;
     type InstArray is array (0 to inst_num) of STD_LOGIC_VECTOR(15 downto 0);
     signal insts: InstArray :=(
-        "0100100100000001",--ADDIU R1 1
-        "0100000101000010",--ADDIU3 R1 R2 2
-        "1110000101001101",--ADDU R1 R2 R3
+        "0110100100000001", -- LI R1 1;
+		  "0110101000000001", -- LI R2 1;
+		  "0110101110000101", -- LI R3 85;
+		  "0011001101100000", -- SLL R3 R3 0;
+		  "0110110000000101", -- LI R4 5;
+		  "1101101100100000", -- SW R3 R1 0;
+		  "1101101101000001", -- SW R3 R2 1;
+		  "1110000101000101", -- ADDU R1 R2 R1;
+		  "1110000101001001", -- ADDU R1 R2 R2;
+		  "0100101100000010", -- ADDIU R3 2;
+		  "0100110011111111", -- ADDIU R4 FF;
+		  "0010110011111001", -- BNEZ R4 F9
         others => "0000000000000000");
 begin
     load_finish <= load_finish_temp;
@@ -91,7 +100,7 @@ begin
                         clk_4 <= not(clk_4);
                     end if;
                 end process;
-    --8分频后给flash用，,单步时钟则不需要
+    --8分频后给flash用，,单步时钟则不需�
     get_clk_8:  process(clk_4)
                 begin
                     if (rising_edge(clk_4)) then
@@ -111,7 +120,7 @@ begin
 									end if;
 								end process;
 								
-    rom_control:process(rst, clk_8, rom_addr, rom_ce, now_addr, insts, load_finish_temp)
+    rom_control:process(rst, clk_4, rom_addr, rom_ce, now_addr, insts, load_finish_temp)
                 begin
                     if (rst = RstEnable) then   --rst之后重新从头load程序
                         Ram2OE <= '1';
@@ -119,15 +128,15 @@ begin
                         Ram2Data <= ZzzzWord;
                         now_addr <= ZeroWord;
                     else    
-                        if (load_finish_temp = '1') then --load完成，那么可以读指令了
+                        if (load_finish_temp = '1') then --load完成，那么可以读指令�
                             Ram2OE <= '0';
                             Ram2Addr <= "00" & rom_addr;
                             Ram2Data <= ZzzzWord;
-                        else										--否则继续load下一条指令
+                        else										--否则继续load下一条指�
                             Ram2OE <= '1';
                             Ram2Addr <= "00" & now_addr;
                             Ram2Data <= insts(conv_integer(now_addr));
-                            if (rising_edge(clk_8)) then
+                            if (rising_edge(clk_4)) then
                                 now_addr <= now_addr + 1;
                             end if;
                         end if;
@@ -139,7 +148,7 @@ begin
                         if (rst = RstEnable or load_finish_temp = '1') then   --reset或者load完成的时候WE就始终为1，因为这时候只有读数据
                             Ram2WE <= '1';
                         else
-                            Ram2WE <= clk;  --写的时候让WE和clk同步，相当于clk=1时，准备数据，clk拉下去的时候WE同时拉下并写入数据
+                            Ram2WE <= clk;  --写的时候让WE和clk同步，相当于clk=1时，准备数据，clk拉下去的时候WE同时拉下并写入数�
                         end if;
                     end process;    
 
@@ -176,7 +185,7 @@ begin
 
     Ram1WE_control: process(rst, clk,ram_read)
                     begin 
-                        if (rst = RstEnable or ram_read = ReadEnable) then    --当读的时候WE始终为1
+                        if (rst = RstEnable or ram_read = ReadEnable) then    --当读的时候WE始终�
                             Ram1WE <= '1';
                         else    
                             Ram1WE <= clk;  --写的时候让WE和clk同步，刚到上升沿的时候准备数据和地址，然后clk下降，WE拉下来，写入数据  

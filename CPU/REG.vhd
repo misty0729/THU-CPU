@@ -53,15 +53,18 @@ architecture Behavioral of REG is
 	signal   regist:	REGS	:=(others => ZeroWord);
 begin
 
-	led(15 downto 14) <= regist(7)(1 downto 0);
-	led(13 downto 12) <= regist(6)(1 downto 0);
-	led(11 downto 10) <= regist(5)(1 downto 0);
-	led(9 downto 8) <= regist(4)(1 downto 0);
-	led(7 downto 6) <= regist(3)(1 downto 0);
-	led(5 downto 4) <= regist(2)(1 downto 0);
-	led(3 downto 2) <= regist(1)(1 downto 0);
-	led(1 downto 0) <= regist(0)(1 downto 0);
-	
+--	led(15 downto 14) <= regist(7)(1 downto 0);
+--	led(13 downto 12) <= regist(6)(1 downto 0);
+--	led(11 downto 10) <= regist(5)(1 downto 0);
+--	led(9 downto 8) <= regist(4)(1 downto 0);
+--	led(7 downto 6) <= regist(3)(1 downto 0);
+--	led(5 downto 4) <= regist(2)(1 downto 0);
+--	led(3 downto 2) <= regist(1)(1 downto 0);
+--	led(1 downto 0) <= regist(0)(1 downto 0);
+	led(15 downto 12) <= regist(4)(3 downto 0);
+	led(11 downto 8) <= regist(3)(3 downto 0);
+	led(7 downto 4) <= regist(2)(3 downto 0);
+	led(3 downto 0) <= regist(1)(3 downto 0);
 	Write1:	process(clk)
 				begin
 					if (rising_edge(clk)) then
