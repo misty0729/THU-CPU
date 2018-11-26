@@ -69,10 +69,14 @@ architecture Behavioral of RomRam is
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
     signal   load_finish_temp:   STD_LOGIC;
     type InstArray is array (0 to inst_num) of STD_LOGIC_VECTOR(15 downto 0);
-    signal insts: InstArray :=(
-        "0100100100000001",--ADDIU R1 1
-        "0100000101000010",--ADDIU3 R1 R2 2
-        "1110000101001101",--ADDU R1 R2 R3
+    signal insts:
+        "0110100110111111",--LI R1 BF
+        "0011000100100000",--SLL R1 R1 0
+        "1001100101000000",--LW R1 R2 0
+        "0101001000110000",--SLTI R2 30
+        "0110000111111101",--BTNEZ FD
+        "0101001000111010",--SLTI R2 3A
+        "0110000111111011",--BTNEZ FB
         others => "0000000000000000");
 begin
     load_finish <= load_finish_temp;
