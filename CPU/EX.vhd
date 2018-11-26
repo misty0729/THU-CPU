@@ -46,7 +46,8 @@ entity EX is
            reg_addr_out : out  STD_LOGIC_VECTOR (3 downto 0);
            reg_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
            mem_addr_out : out  STD_LOGIC_VECTOR (15 downto 0);
-           mem_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0));
+           mem_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
+			  led : out STD_LOGIC_VECTOR (15 downto 0));
 end EX;
 
 architecture Behavioral of EX is
@@ -59,7 +60,8 @@ architecture Behavioral of EX is
 	signal move_out: STD_LOGIC_VECTOR(15 downto 0);
 	signal store_out: STD_LOGIC_VECTOR(15 downto 0);
 begin
-	
+	led(15 downto 8) <= reg1_data_in(7 downto 0);
+	led(7 downto 0) <= reg2_data_in(7 downto 0);
 	nop: process(rst, op_in) is
 	begin
 		if rst = RstEnable then
