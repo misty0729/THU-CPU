@@ -19,6 +19,9 @@
 ----------------------------------------------------------------------------------
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.STD_LOGIC_UNSIGNED.ALL;
+use IEEE.STD_LOGIC_ARITH.ALL;
+use WORK.DEFINES.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -55,7 +58,8 @@ signal fakeled: STD_LOGIC_VECTOR(15 downto 0);
 
 --CTRL_PROVIDE
 signal stall: STD_LOGIC_VECTOR(5 downto 0);
-
+signal stallreq_from_if: STD_LOGIC;
+signal stallreq_from_mem: STD_LOGIC;
 --IF_NEED
 
 
@@ -293,12 +297,16 @@ component REG
 end component;
 
 component CTRL
-    Port ( rst              : in  STD_LOGIC;
+    Port ( rst : in  STD_LOGIC;
            stallreq_from_id : in  STD_LOGIC;
-           stall            : out  STD_LOGIC_VECTOR (5 downto 0));
+			  stallreq_from_if : in  STD_LOGIC;
+			  stallreq_from_mem: in  STD_LOGIC;
+           stall : out  STD_LOGIC_VECTOR (5 downto 0));
 end component;
 begin
 	 rom_addr<=pc_tmp;
+	 stallreq_from_if <= NoStop;
+	 stallreq_from_mem<= NoStop;
 	
     PC_component: PC port map(rst=>rst, clk=>clk, stall=>stall, branch_flag_in=>id_branch_flag_out,branch_target_addr_in=>id_branch_target_addr_out,pc=>pc_tmp,ce=>rom_ce);
 
@@ -346,6 +354,6 @@ begin
                                 we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in
 										  ,led=>led);
 
-    CTRL_component: CTRL port map(rst=>rst, stallreq_from_id=>id_stallreq_out, stall=>stall);
+    CTRL_component: CTRL port map(rst=>rst, stallreq_from_id=>id_stallreq_out, stallreq_from_if=>stallreq_from_if,stallreq_from_mem=>stallreq_from_mem, stall=>stall);
 end Behavioral;
 

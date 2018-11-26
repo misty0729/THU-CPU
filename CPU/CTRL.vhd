@@ -35,6 +35,8 @@ use WORK.DEFINES.ALL;
 entity CTRL is
     Port ( rst : in  STD_LOGIC;
            stallreq_from_id : in  STD_LOGIC;
+			  stallreq_from_if : in  STD_LOGIC;
+			  stallreq_from_mem: in  STD_LOGIC;
            stall : out  STD_LOGIC_VECTOR (5 downto 0));
 end CTRL;
 
@@ -46,9 +48,11 @@ begin
 				if (rst = RstEnable) then
 					stall <= "000000";
 				elsif (stallreq_from_id = Stop) then
-					stall <= "000000";
-				else
-					stall <= "000000";
+					stall <= "000111";
+				elsif (stallreq_from_if = Stop) then 
+					stall <= "001111";
+				elsif (stallreq_from_mem = Stop) then
+					stall <= "011111";
 				end if;
 			end process;
 
