@@ -34,11 +34,28 @@ entity SOPC is
            clk : in  STD_LOGIC;
            led : out  STD_LOGIC_VECTOR (15 downto 0);
 			  dyp0: out STD_LOGIC_VECTOR(6 downto 0);
-			  dyp1: out STD_LOGIC_VECTOR(6 downto 0));
+			  dyp1: out STD_LOGIC_VECTOR(6 downto 0);
+			  
+			  Ram2Addr:           out  	STD_LOGIC_VECTOR(17 downto 0);
+			  Ram2Data:           inout 	STD_LOGIC_VECTOR(15 downto 0);
+			  Ram2OE:             out  	STD_LOGIC;
+			  Ram2WE:             out 		STD_LOGIC;
+			  Ram2EN:             out 		STD_LOGIC;
+			  Ram1Addr:           out  	STD_LOGIC_VECTOR(17 downto 0);
+			  Ram1Data:           inout 	STD_LOGIC_VECTOR(15 downto 0);
+			  Ram1OE:             out 		STD_LOGIC;
+			  Ram1WE:             out 		STD_LOGIC;
+			  Ram1EN:             out 		STD_LOGIC;
+			  rdn:                out 		STD_LOGIC;
+			  wrn:                out 		STD_LOGIC);
 end SOPC;
 
 
 architecture Behavioral of SOPC is
+
+--CPU_NEED
+signal load_finish: STD_LOGIC;
+signal rst_for_cpu:	STD_LOGIC;
 
 --ROM_NEED
 signal rom_ce :  STD_LOGIC;
@@ -86,14 +103,48 @@ component RAM
 			data_out: 	out  	STD_LOGIC_VECTOR (15 downto 0));
 end component;
 
+component RomRam
+Port(   rst:                in  STD_LOGIC;
+        clk:                in  STD_LOGIC;
+        
+        rom_ce :            in  STD_LOGIC;
+        rom_addr :          in  STD_LOGIC_VECTOR (15 downto 0);
+        rom_read_data :     out  STD_LOGIC_VECTOR (15 downto 0);
+        Ram2Addr:           out  STD_LOGIC_VECTOR(17 downto 0);
+		Ram2Data:           inout STD_LOGIC_VECTOR(15 downto 0);
+		Ram2OE:             out  STD_LOGIC;
+		Ram2WE:             out STD_LOGIC;
+		Ram2EN:             out STD_LOGIC;
+
+        ram_ce :            in  STD_LOGIC;
+        ram_we :            in  STD_LOGIC;
+        ram_write_data :    in  STD_LOGIC_VECTOR (15 downto 0);
+        ram_addr :          in  STD_LOGIC_VECTOR (15 downto 0);
+        ram_read_data :     out  STD_LOGIC_VECTOR (15 downto 0);
+        Ram1Addr:           out  STD_LOGIC_VECTOR(17 downto 0);
+		Ram1Data:           inout STD_LOGIC_VECTOR(15 downto 0);
+		Ram1OE:             out STD_LOGIC;
+		Ram1WE:             out STD_LOGIC;
+		Ram1EN:             out STD_LOGIC;
+		rdn:                out STD_LOGIC;
+		wrn:                out STD_LOGIC;
+
+        load_finish:        out STD_LOGIC);
+end component;
 begin
-    CPU_component: CPU port map(clk=>clk, rst=>rst, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
+	 rst_for_cpu <= rst and load_finish;
+    CPU_component: CPU port map(clk=>clk, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
                                 led=>led, dyp0=>dyp0, dyp1=>dyp1);
 
-    ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
+--    ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 
-    RAM_component: RAM port map(clk=>clk, ce=>ram_ce, we=>ram_we, data_in=>ram_write_data_out, addr=>ram_addr, data_out=>ram_read_data_in);
-
+--    RAM_component: RAM port map(clk=>clk, ce=>ram_ce, we=>ram_we, data_in=>ram_write_data_out, addr=>ram_addr, data_out=>ram_read_data_in);
+	 RomRam_component: RomRam port map(clk=>clk, rst=>rst, 
+													rom_ce=>rom_ce, rom_addr=>rom_addr, rom_read_data=>rom_read_data_in,
+													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
+													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
+													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
+													load_finish=>load_finish);
 end Behavioral;
 

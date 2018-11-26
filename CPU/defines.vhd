@@ -30,7 +30,8 @@ package defines is
 --
 	--Constant
 	constant ZeroWord:		STD_LOGIC_VECTOR(15 downto 0)	:="0000000000000000";
-
+	constant ZzzzWord:		STD_LOGIC_VECTOR(15 downto 0) :="ZZZZZZZZZZZZZZZZ";
+	constant NopInst:			STD_LOGIC_VECTOR(15 downto 0) :="0000100000000000";
 	--Enable
 	constant RstEnable:		STD_LOGIC	:='0';
 	constant RstDisable:		STD_LOGIC	:='1';
