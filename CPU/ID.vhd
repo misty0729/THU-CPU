@@ -146,9 +146,9 @@ begin
 										reg1_addr_temp 				<= y;
 										reg2_read_temp 				<= ReadDisable;
 										if (imm3 = "000") then
-											imm						<= SXT("1000",16);
+											imm						<= EXT("1000",16);
 										else 
-											imm						<= SXT(imm3,16);
+											imm						<= EXT(imm3,16);
 										end if;
 										reg_write_out 				<= WriteEnable;
 										reg_addr_out  				<= x;
@@ -159,9 +159,9 @@ begin
 										reg1_addr_temp 				<= y;
 										reg2_read_temp 				<= ReadDisable;
 										if (imm3 = "000") then
-											imm						<= SXT("1000",16);
+											imm						<= EXT("1000",16);
 										else 
-											imm						<= SXT(imm3,16);
+											imm						<= EXT(imm3,16);
 										end if;
 										reg_write_out 				<= WriteEnable;
 										reg_addr_out  				<= x;
@@ -172,9 +172,9 @@ begin
 										reg1_addr_temp 				<= y;
 										reg2_read_temp 				<= ReadDisable;
 										if (imm3 = "000") then
-											imm						<= SXT("1000",16);
+											imm						<= EXT("1000",16);
 										else 
-											imm						<= SXT(imm3,16);
+											imm						<= EXT(imm3,16);
 										end if;
 										reg_write_out 				<= WriteEnable;
 										reg_addr_out  				<= x;
