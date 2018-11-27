@@ -50,7 +50,10 @@ entity SOPC is
 			  Ram1WE:             out 		STD_LOGIC;
 			  Ram1EN:             out 		STD_LOGIC;
 			  rdn:                out 		STD_LOGIC;
-			  wrn:                out 		STD_LOGIC);
+			  wrn:                out 		STD_LOGIC;
+			  tbre:					 in		STD_LOGIC;
+			  tsre:					 in		STD_LOGIC;
+			  data_ready:			 in		STD_LOGIC);
 end SOPC;
 
 
@@ -131,6 +134,9 @@ Port(   rst:                in  STD_LOGIC;
 		Ram1EN:             out STD_LOGIC;
 		rdn:                out STD_LOGIC;
 		wrn:                out STD_LOGIC;
+		  tbre:               in  STD_LOGIC;
+        tsre:               in  STD_LOGIC;
+        data_ready:         in  STD_LOGIC;
 
         load_finish:        out STD_LOGIC);
 end component;
@@ -148,6 +154,6 @@ begin
 													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
 													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
-													load_finish=>load_finish);
+													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready);
 end Behavioral;
 

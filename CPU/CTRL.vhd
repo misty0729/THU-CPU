@@ -43,7 +43,7 @@ end CTRL;
 architecture Behavioral of CTRL is
 
 begin
-	main:	process(rst, stallreq_from_id)
+	main:	process(rst, stallreq_from_id, stallreq_from_if, stallreq_from_mem)
 			begin
 				if (rst = RstEnable) then
 					stall <= "000000";
@@ -53,6 +53,8 @@ begin
 					stall <= "001111";
 				elsif (stallreq_from_mem = Stop) then
 					stall <= "011111";
+				else
+					stall <= "000000";
 				end if;
 			end process;
 
