@@ -37,7 +37,7 @@ entity flash_io is
     Port ( 	  --想要读取的flash地址 补零
     		  addr : in  STD_LOGIC_VECTOR (15 downto 0);
     		  --输出到发光二极管
-           	  data_out : out  STD_LOGIC_VECTOR (15 downto 0);
+           data_out : out  STD_LOGIC_VECTOR (15 downto 0);
 
 			  clk : in std_logic;
 			  reset : in std_logic;
@@ -49,7 +49,10 @@ entity flash_io is
 			  flash_we : out std_logic;
 			  flash_rp : out std_logic;
 			  flash_addr : out std_logic_vector(22 downto 0);
-			  flash_data : inout std_logic_vector(15 downto 0)
+			  flash_data : inout std_logic_vector(15 downto 0);
+			  
+			  dyp0 : out std_logic_vector(6 downto 0);
+			  dyp1 : out std_logic_vector(6 downto 0)
 			  
            --ctl_read : in  STD_LOGIC
 	);
@@ -61,8 +64,8 @@ architecture Behavioral of flash_io is
 		read1, read2, read3, read4,
 		done
 	);
-	signal state : flash_state := waiting;
-	signal next_state : flash_state := waiting;
+	
+	--signal next_state : flash_state := waiting;
 	
 	--signal ctl_read_last : std_logic;
 	
@@ -110,53 +113,68 @@ begin
 --		id := conv_integer(addr);
 --		data_out <= insts(id);
 --	end process;
-
-	flash_byte <= '1';
-	flash_vpen <= '1';
-	flash_ce <= '0';
-	flash_rp <= '1';
 	
-	process (clk, reset)
+	main: process (clk, reset) is
+		variable state : flash_state := waiting;
 	begin
-		if (reset = '0') then
+		if reset = '0' then
+			state := waiting;
 			flash_oe <= '1';
 			flash_we <= '1';
-			state <= waiting;
-			next_state <= waiting;
+			flash_byte <= '1';
+			flash_vpen <= '1';
+			flash_ce <= '0';
+			flash_rp <= '1';
+			dyp0 <= "1100000";
+			dyp1 <= "0000000";
+			--next_state <= waiting;
 			--ctl_read_last <= ctl_read;
 			flash_data <= (others => 'Z');
-		elsif (clk'event and clk = '1') then
+		elsif rising_edge(clk) then
 			case state is
 				when waiting =>
+					dyp1 <= "0000001";
+					dyp0 <= "1100000";
 					--if (ctl_read /= ctl_read_last) then
 						flash_we <= '0';
-						state <= read1;
+						state := read1;
 						--ctl_read_last <= ctl_read;
 					--end if;
 				when read1 =>
+					dyp1 <= "0000100";
+					dyp0 <= "0000001";
 					flash_data <= x"00FF";
-					state <= read2;
+					state := read2;
 				when read2 =>
+					dyp1 <= "0010000";				
+					dyp0 <= "0000011";
 					flash_we <= '1';
-					state <= read3;
+					state := read3;
 				when read3 =>
+					dyp1 <= "1000000";
+					dyp0 <= "0000111";
 					flash_oe <= '0';
-					flash_addr <= addr&"0000000";
+					flash_addr <= "0000000"&addr;
 					flash_data <= (others => 'Z');
-					state <= read4;
+					state := read4;
 				when read4 =>
+					dyp1 <= "0100000";
+					dyp0 <= "0001111";
 					data_out <= flash_data;
 					flash_oe <= '1';
-					state <= done;
-					
-				when others =>
+					state := done;
+				when done =>
+					dyp1 <= "0001000";
+					dyp0 <= "1000000";
 					flash_oe <= '1';
 					flash_we <= '1';
 					flash_data <= (others => 'Z');
-					state <= waiting;
+					state := waiting;
+				when others =>
+					state := waiting;
 			end case;
 		end if;
-	end process;
+	end process main;
 	
 
 

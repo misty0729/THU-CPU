@@ -1,7 +1,6 @@
 
-# PlanAhead Generated physical constraints 
 
-NET "clk" LOC = B9;
+NET "clk" LOC = U9;
 NET "reset" LOC = U10;
 NET "addr[0]" LOC = T7;
 NET "addr[1]" LOC = R7;
@@ -80,3 +79,21 @@ NET "flash_data[12]" LOC = G4;
 NET "flash_data[13]" LOC = G3;
 NET "flash_data[14]" LOC = F2;
 NET "flash_data[15]" LOC = F1;
+
+
+NET "dyp0[0]" LOC = C7;
+NET "dyp0[1]" LOC = D7;
+NET "dyp0[2]" LOC = E7;
+NET "dyp0[3]" LOC = F7;
+NET "dyp0[4]" LOC = A8;
+NET "dyp0[5]" LOC = E8;
+NET "dyp0[6]" LOC = F8;
+NET "dyp1[0]" LOC = C9;
+NET "dyp1[1]" LOC = D9;
+NET "dyp1[2]" LOC = E9;
+NET "dyp1[3]" LOC = F9;
+NET "dyp1[4]" LOC = G9;
+NET "dyp1[5]" LOC = A10;
+NET "dyp1[6]" LOC = B10;
+
+# PlanAhead Generated physical constraints 
