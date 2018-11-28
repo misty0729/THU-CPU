@@ -69,6 +69,8 @@ architecture Behavioral of flash_io is
 	
 	--signal ctl_read_last : std_logic;
 	
+	--signal flash_data_tmp : std_logic_vector(15 downto 0);
+	
 	constant InstNum : integer := 100;
 	type InstArray is array (0 to InstNum) of STD_LOGIC_VECTOR(15 downto 0);
 	signal insts: InstArray := (
@@ -113,6 +115,8 @@ begin
 --		id := conv_integer(addr);
 --		data_out <= insts(id);
 --	end process;
+
+	-- data_out <= flash_data;
 	
 	main: process (clk, reset) is
 		variable state : flash_state := waiting;
@@ -156,6 +160,7 @@ begin
 					flash_oe <= '0';
 					flash_addr <= "0000000"&addr;
 					flash_data <= (others => 'Z');
+					-- flash_data_tmp <= flash_data;
 					state := read4;
 				when read4 =>
 					dyp1 <= "0100000";
