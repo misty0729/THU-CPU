@@ -61,14 +61,15 @@ Port(   rst:                in  STD_LOGIC;
         tsre:               in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
 
-        load_finish:        out STD_LOGIC);
+        load_finish:        out STD_LOGIC;
+		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
 end RomRam;
 
 architecture Behavioral of RomRam is
     signal clk_2,clk_4,clk_8:   STD_LOGIC;
     signal ram_read, ram_write: STD_LOGIC;
-    constant load_num : integer :=511;
-    constant inst_num : integer :=511;
+    constant load_num : integer :=600;
+    constant inst_num : integer :=1023;
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
     signal   load_finish_temp:   STD_LOGIC;
     type InstArray is array (0 to inst_num) of STD_LOGIC_VECTOR(15 downto 0);
@@ -76,7 +77,7 @@ architecture Behavioral of RomRam is
         "0000000000000000",
 "0000000000000000",
 "0000100000000000",
-"0001000001000100",
+"0001000001100001",
 "0000100000000000",
 "0000100000000000",
 "0000100000000000",
@@ -87,6 +88,8 @@ architecture Behavioral of RomRam is
 "1101111000000000",
 "1101111000100001",
 "1101111001000010",
+"1101111010000100",
+"1101111010100101",
 "1001000100000000",
 "0110001100000001",
 "0110100011111111",
@@ -101,26 +104,51 @@ architecture Behavioral of RomRam is
 "1110111101000000",
 "0100111100000011",
 "0000100000000000",
-"0001000010001010",
+"0001000010101100",
 "0000100000000000",
 "0110111010111111",
 "0011011011000000",
 "1101111001100000",
 "0000100000000000",
+"0110111010111111",
+"0011011011000000",
+"0100111000010000",
+"0110100000000000",
+"1110100000101010",
+"0110000100000010",
+"0000100000000000",
+"1001111010000111",
+"0110100000100000",
+"1110100000101010",
+"0110000100000010",
+"0000100000000000",
+"1001111010001000",
+"0110100000010000",
+"1110100000101010",
+"0110000100000010",
+"0000100000000000",
+"1001111010001001",
+"0000100000000000",
+"1001111010100110",
+"1110110010100010",
+"0110000100001011",
+"0000100000000000",
+"1101111010000110",
 "1110111101000000",
 "0100111100000011",
 "0000100000000000",
-"0001000010000001",
+"0001000010001011",
 "0000100000000000",
 "0110111010111111",
 "0011011011000000",
 "1101111000100000",
 "0000100000000000",
+"0000100000000000",
 "0110101100001111",
 "1110111101000000",
 "0100111100000011",
 "0000100000000000",
-"0001000001110111",
+"0001000010000000",
 "0000100000000000",
 "0110111010111111",
 "0011011011000000",
@@ -137,6 +165,8 @@ architecture Behavioral of RomRam is
 "1001111100000000",
 "1001111100100001",
 "1001111101000010",
+"1001111110000100",
+"1001111110100101",
 "1001011100000000",
 "0110001100000001",
 "0110001100000001",
@@ -162,6 +192,13 @@ architecture Behavioral of RomRam is
 "1101111000000011",
 "1101111000000100",
 "1101111000000101",
+"1101111000000110",
+"0100100000000001",
+"1101111000000111",
+"0100100000000001",
+"1101111000001000",
+"0100100000000001",
+"1101111000001001",
 "1110111101000000",
 "0100111100000011",
 "0000100000000000",
@@ -577,6 +614,10 @@ architecture Behavioral of RomRam is
     signal serial_read:     STD_LOGIC;
     signal serial_write:    STD_LOGIC;
 begin
+	 dyp(0) <= tbre;
+	 dyp(2) <= tsre;
+	 dyp(4) <= data_ready;
+	 dyp(6) <= load_finish_temp;
     load_finish <= load_finish_temp;
     ram_read <= not(ram_ce) and not(ram_we); -- =1 when ram_ce=RamEnable and ram_we=Read
     ram_write <= not(ram_ce) and ram_we;		-- =1 when ram_ce=RamEnable and ram_we=Write
@@ -667,15 +708,15 @@ begin
                     else
                         if (ram_read = ReadEnable) then
                             if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果，
-                                Ram1EN <= RamDisable;
+                                Ram1EN <= RamEnable;
                                 Ram1OE <= '1';
-                                Ram1Addr <= "00" & ZeroWord;
+                                Ram1Addr <= "00" & ram_addr;
                                 if (tbre = '1' and tsre = '1' and data_ready = '1') then
                                     Ram1Data <= x"0003";
                                 elsif (tbre = '1' and tsre = '1') then
-                                    Ram1Data <= x"0002";
-                                elsif (data_ready = '1') then
                                     Ram1Data <= x"0001";
+                                elsif (data_ready = '1') then
+                                    Ram1Data <= x"0002";
                                 else
                                     Ram1Data <= x"0000";
                                 end if;
@@ -697,7 +738,7 @@ begin
                                 serial_write<= '0';
                             end if;        
                         elsif (ram_write = WriteEnable) then --写入串口数据
-                            if (ram_addr = x"bf01") then     
+                            if (ram_addr = x"bf00") then     
                                 Ram1EN <= RamDisable;
                                 Ram1OE <= '1';
                                 Ram1Addr <= "00" & ZeroWord;

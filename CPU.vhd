@@ -240,16 +240,16 @@ end component;
 
 component MEM
 	Port (
-		--指令的类�
+		--指令的类
 		op_type_in : in STD_LOGIC_VECTOR (2 downto 0);
-		--写使�
+		--写使
 		reg_write_in : in STD_LOGIC;
 		reg_addr_in : in STD_LOGIC_VECTOR(3 downto 0);
 		--写入寄存器的数据
 		reg_data_in : in STD_LOGIC_VECTOR(15 downto 0);
-		--�写的内存地址
+		--写的内存地址
 		mem_addr_in : in STD_LOGIC_VECTOR(15 downto 0);
-		--写入内存的数�
+		--写入内存的数
 		mem_write_data_in : in STD_LOGIC_VECTOR(15 downto 0);
 		mem_read_data_in : in STD_LOGIC_VECTOR(15 downto 0);
 		rst : in STD_LOGIC;
@@ -258,11 +258,11 @@ component MEM
 		reg_addr_out : out STD_LOGIC_VECTOR(3 downto 0);
 		reg_data_out : out STD_LOGIC_VECTOR(15 downto 0);
 
-		--�写内存地址
+		--写内存地址
 		mem_addr_out : out STD_LOGIC_VECTOR(15 downto 0);
-		--写入内存的数�
+		--写入内存的数
 		mem_data_out : out STD_LOGIC_VECTOR(15 downto 0);
-		--操作ram1读写的两个使能端�
+		--操作ram1读写的两个使能端
 		mem_we_out : out STD_LOGIC;
 		mem_ce_out : out STD_LOGIC);
 end component;
@@ -274,7 +274,7 @@ component MEM_WB
 		stall : in STD_LOGIC_VECTOR(5 downto 0);
 		--写使能端
 		mem_reg_write : in STD_LOGIC;
-		--写的寄存器编�
+		--写的寄存器编
 		mem_reg_addr : in STD_LOGIC_VECTOR(3 downto 0);
 		mem_reg_data : in STD_LOGIC_VECTOR(15 downto 0);
 		wb_reg_addr : out STD_LOGIC_VECTOR(3 downto 0);
@@ -321,7 +321,7 @@ begin
                             reg_write_out=>id_reg_write_out, reg_addr_out=>id_reg_addr_out, 
                             mem_write_data_out=>id_mem_write_data_out, branch_flag_out=>id_branch_flag_out, branch_target_addr_out=>id_branch_target_addr_out,
                             reg1_read_out=>id_reg1_read_out, reg1_addr_out=>id_reg1_addr_out, reg2_read_out=>id_reg2_read_out,reg2_addr_out=>id_reg2_addr_out,
-                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>fakeled);
+                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>led);
 
     ID_EX_component: ID_EX port map(rst=>rst, clk=>clk, id_op=>id_op_out, id_op_type=>id_op_type_out, id_reg1_data=>id_reg1_data_out,id_reg2_data=>id_reg2_data_out,
                                     id_reg_write=>id_reg_write_out, id_reg_addr=>id_reg_addr_out, id_mem_write_data=>id_mem_write_data_out,
@@ -333,7 +333,7 @@ begin
                               reg1_data_in=>ex_reg1_data_in, reg2_data_in=>ex_reg2_data_in, reg_write_in=>ex_reg_write_in, reg_addr_in=>ex_reg_addr_in,
                               mem_write_data_in=>ex_mem_write_data_in,
                               op_type_out=>ex_op_type_out, reg_write_out=>ex_reg_write_out, reg_addr_out=>ex_reg_addr_out, reg_data_out=>ex_reg_data_out,
-                              mem_addr_out=>ex_mem_addr_out, mem_write_data_out=>ex_mem_write_data_out, led => led);
+                              mem_addr_out=>ex_mem_addr_out, mem_write_data_out=>ex_mem_write_data_out, led => fakeled);
 
     EX_MEM_component: EX_MEM port map(rst=>rst, clk=>clk, ex_op_type=>ex_op_type_out, ex_reg_write=>ex_reg_write_out, ex_reg_addr=>ex_reg_addr_out,ex_reg_data=>ex_reg_data_out,
                                       ex_mem_addr=>ex_mem_addr_out, ex_mem_write_data=>ex_mem_write_data_out,

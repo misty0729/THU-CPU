@@ -219,12 +219,12 @@ begin
 		end if;
 	end process load;
 	
-	move: process(rst, op_in, reg1_data_in) is
+	move: process(rst, op_in, reg1_data_in, reg2_data_in) is
 	begin
 		if rst = RstEnable then
 			move_out <= ZeroWord;
 		else
-			move_out <= reg1_data_in;
+			move_out <= reg1_data_in + reg2_data_in;
 		end if;
 	end process move;
 	

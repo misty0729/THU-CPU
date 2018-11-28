@@ -35,6 +35,8 @@ use WORK.DEFINES.ALL;
 entity SOPC is
     Port ( rst : in  STD_LOGIC;
            clk : in  STD_LOGIC;
+			  clk_step:	in STD_LOGIC;
+			  
            led : out  STD_LOGIC_VECTOR (15 downto 0);
 			  dyp0: out STD_LOGIC_VECTOR(6 downto 0);
 			  dyp1: out STD_LOGIC_VECTOR(6 downto 0);
@@ -58,6 +60,8 @@ end SOPC;
 
 
 architecture Behavioral of SOPC is
+--DEBUG_NEED
+signal fakedyp: STD_LOGIC_VECTOR(6 downto 0);
 
 --CPU_NEED
 signal load_finish: STD_LOGIC;
@@ -138,13 +142,14 @@ Port(   rst:                in  STD_LOGIC;
         tsre:               in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
 
-        load_finish:        out STD_LOGIC);
+        load_finish:        out STD_LOGIC;
+		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
 end component;
 begin
 	 rst_for_cpu <= rst and load_finish;
     CPU_component: CPU port map(clk=>clk, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
-                                led=>led, dyp0=>dyp0, dyp1=>dyp1);
+                                led=>led, dyp0=>fakedyp, dyp1=>dyp1);
 
 --    ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 
@@ -154,6 +159,6 @@ begin
 													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
 													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
-													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready);
+													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0);
 end Behavioral;
 
