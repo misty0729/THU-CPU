@@ -76,6 +76,11 @@ NET "Ram1OE" LOC = M16;
 NET "Ram1WE" LOC = M18;
 NET "rdn" LOC = C14;
 NET "wrn" LOC = U5;
+NET "rdn" LOC = C14;
+NET "wrn" LOC = U5;
+NET "data_ready" LOC = A16;
+NET "tbre" LOC = D14;
+NET "tsre" LOC = N9;
 
 NET "Ram2Addr[17]" LOC = U15;
 NET "Ram2Addr[16]" LOC = U16;
