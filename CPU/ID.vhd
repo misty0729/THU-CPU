@@ -553,7 +553,10 @@ begin
 								reg1_addr_temp						<= SP_REGISTER;
 								reg2_read_temp						<= ReadEnable;
 								reg2_addr_temp						<= SP_REGISTER;
-								imm									<= ZeroWord;
+								imm									<= SXT(imm4,16);
+								reg_write_out						<=	WriteEnable;
+								reg_addr_out						<=	"0110";
+								
 							when others =>
 		
 						end case;	

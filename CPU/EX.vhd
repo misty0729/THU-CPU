@@ -141,6 +141,10 @@ begin
 					
 				when EXE_SUBU_OP =>
 					arith_out <= reg1_data_in - reg2_data_in;
+				
+				when EXE_INT_OP =>
+					arith_out <= reg2_data_in;
+					
 				when others =>
 					arith_out <= ZeroWord;
 			end case;
@@ -233,11 +237,15 @@ begin
 		if rst = RstEnable then
 			store_out <= ZeroWord;
 		else
-			store_out <= reg1_data_in + reg2_data_in;
+			if op_in = EXE_INT_OP then
+				store_out <= reg1_data_in;
+			else
+				store_out <= reg1_data_in + reg2_data_in;
+			end if;
 		end if;
 	end process store;
 	
-	output: process(op_type_in, reg_write_in, reg_addr_in, mem_write_data_in, nop_out, arith_out, logic_out, branch_out, jump_out, load_out, move_out, store_out) is
+	output: process(op_in, op_type_in, reg_write_in, reg_addr_in, mem_write_data_in, nop_out, arith_out, logic_out, branch_out, jump_out, load_out, move_out, store_out) is
 	begin
 		op_type_out <= op_type_in;
 		reg_write_out <= reg_write_in;
@@ -266,8 +274,13 @@ begin
 				reg_data_out <= move_out;
 				mem_addr_out <= ZeroWord;
 			when EXE_STORE_TYPE =>
-				reg_data_out <= ZeroWord;
-				mem_addr_out <= store_out;
+				if(op_in = EXE_INT_OP) then
+					reg_data_out <= arith_out;
+					mem_addr_out <= store_out;
+				else
+					reg_data_out <= ZeroWord;
+					mem_addr_out <= store_out;
+				end if;
 			when others =>
 				reg_data_out <= ZeroWord;
 				mem_addr_out <= ZeroWord;
