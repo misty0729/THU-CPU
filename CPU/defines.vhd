@@ -111,6 +111,8 @@ package defines is
 	constant RA_REGISTER:	STD_LOGIC_VECTOR(3 downto 0)	:="1010";
 	constant IH_REGISTER:	STD_LOGIC_VECTOR(3 downto 0)	:="1011";
 	
+	--int addr
+	constant Intconstant_addr:		STD_LOGIC_VECTOR(15 downto 0)	:= x"000F";
 end defines;
 
 package body defines is

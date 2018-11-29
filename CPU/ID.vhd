@@ -543,8 +543,19 @@ begin
 								imm									<= SXT(imm8,16);
 					
 							when "11111" =>		--INT   00000 imm
+								op_temp								<= EXE_INT_OP;
+								--op_type_out							<= EXE_BRANCH_TYPE;
+								--reg_write_out						<= WriteEnable;
+								--reg_addr_out						<= SP_REGISTER;
+								--op_temp								<= EXE_SW_SP_OP;
+								op_type_out							<= EXE_STORE_TYPE;
+								reg1_read_temp						<= ReadEnable;
+								reg1_addr_temp						<= SP_REGISTER;
+								reg2_read_temp						<= ReadEnable;
+								reg2_addr_temp						<= SP_REGISTER;
+								imm									<= ZeroWord;
 							when others =>
-
+		
 						end case;	
 					end if;
 				end process;
@@ -599,7 +610,7 @@ begin
                                 if (rst = RstEnable) then 
                                     reg2_data_out <= ZeroWord;
                                 elsif (reg2_read_temp = ReadEnable) then
-                                    if (op_temp = EXE_SW_OP or op_temp = EXE_SW_RS_OP or op_temp = EXE_SW_SP_OP) then
+                                    if (op_temp = EXE_SW_OP or op_temp = EXE_SW_RS_OP or op_temp = EXE_SW_SP_OP or op_temp =  EXE_INT_OP) then
                                         reg2_data_out <= imm;
                                     else
                                         reg2_data_out <= reg2_data_temp;
@@ -611,12 +622,14 @@ begin
                                 end if;
                             end process;
 
-    Get_mem_write_data_out: process(rst, reg2_data_temp, op_temp)
+    Get_mem_write_data_out: process(rst, reg2_data_temp, op_temp, pc_plus_1)
                             begin
                                 if (rst = RstEnable) then 
                                     mem_write_data_out <= ZeroWord;
                                 elsif (op_temp = EXE_SW_OP or op_temp = EXE_SW_RS_OP or op_temp = EXE_SW_SP_OP) then
                                     mem_write_data_out <= reg2_data_temp;
+										  elsif(op_temp =  EXE_INT_OP) then
+												mem_write_data_out <= pc_plus_1;
                                 else
                                     mem_write_data_out <= ZeroWord;
                                 end if;
@@ -649,6 +662,9 @@ begin
                                 elsif (op_temp = EXE_B_OP) then
                                         branch_flag_out <= Branch;
                                         branch_target_addr_out <= pc_plus_1 + imm;
+										  elsif (op_temp = EXE_INT_OP) then
+													branch_flag_out <= Branch;
+													branch_target_addr_out <= Intconstant_addr;
                                 else                                    
                                     branch_flag_out <= NoBranch;
                                     branch_target_addr_out <= ZeroWord;                                
