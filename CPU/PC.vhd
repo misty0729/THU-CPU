@@ -47,27 +47,20 @@ architecture Behavioral of PC is
 begin
 	pc <= pc_tmp;
 	
-	pc_arr: process(clk, rst, branch_flag_in, branch_target_addr_in) is
+	arr: process(clk, rst, branch_flag_in, branch_target_addr_in) is
 	begin
 		if rst = RstEnable then
 			pc_tmp <= ZeroWord;
+			ce <= RamDisable;
 		elsif rising_edge(clk) then
 			if stall(0) = Stop then
 				pc_tmp <= pc_tmp;
+				ce <= RamDisable;
 			elsif branch_flag_in = '1' then
 				pc_tmp <= branch_target_addr_in;
+				ce <= RamEnable;
 			else
 				pc_tmp <= pc_tmp + '1';
-			end if;
-		end if;
-	end process pc_arr;
-	
-	ce_arr: process(clk, rst) is
-	begin
-		if rising_edge(clk) then
-			if rst = RstEnable then
-				ce <= RamDisable;
-			else 
 				ce <= RamEnable;
 			end if;
 		end if;
