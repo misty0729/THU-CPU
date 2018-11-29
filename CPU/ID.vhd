@@ -491,7 +491,7 @@ begin
 							when "01101" =>		--LI    01101 rx imm
 								op_temp								<= EXE_LI_OP;
 								op_type_out							<= EXE_ARITH_TYPE;
-								imm									<= SXT(imm8,16);
+								imm									<= EXT(imm8,16);
 								reg_write_out						<= WriteEnable;
 								reg_addr_out						<= x;
 							
@@ -509,7 +509,7 @@ begin
 								op_type_out							<= EXE_ARITH_TYPE;
 								reg1_read_temp						<= ReadEnable;
 								reg1_addr_temp						<= x;
-								imm									<= SXT(imm8,16);
+								imm									<= EXT(imm8,16);
 								reg_write_out						<= WriteEnable;
 								reg_addr_out						<= T_REGISTER;
 							
