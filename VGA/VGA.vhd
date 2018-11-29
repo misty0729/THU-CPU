@@ -25,7 +25,7 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 -- Uncomment the following library declaration if instantiating
 -- any Xilinx primitives in this code.
@@ -58,7 +58,7 @@ begin
 	begin
 		if i < 480 and j < 640 then
 			R <= "111";
-			G <= "000";
+			G <= "111";
 			B <= "000";
 		else
 			R <= "000";
@@ -79,31 +79,21 @@ begin
 		end if;
 	end process;
 	
-	j_scan: process(clk2, rst)
+	scan: process(clk2, rst)
 	begin
 		if rst = '0' then
 			j <= 0;
 		else
 			if (rising_edge(clk2)) then
 				if j = 799 then
+					if i = 524 then
+						i <= 0;
+					else
+						i <= i + 1;
+					end if;
 					j <= 0;
 				else
 					j <= j + 1;
-				end if;
-			end if;
-		end if;
-	end process;
-	
-	i_scan: process(clk2, rst)
-	begin
-		if rst = '0' then
-			i <= 0;
-		else
-			if j = 799 then
-				if i = 524 then
-					i <= 0;
-				else
-					i <= i + 1;
 				end if;
 			end if;
 		end if;
