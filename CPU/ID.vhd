@@ -543,6 +543,11 @@ begin
 								imm									<= SXT(imm8,16);
 					
 							when "11111" =>		--INT   00000 imm
+								op_temp								<= EXE_INT_OP;
+								op_type_out							<= EXE_BRANCH_TYPE;
+								reg_write_out						<= WriteEnable;
+								reg_addr_out						<= SP_REGISTER;
+								
 							when others =>
 
 						end case;	
