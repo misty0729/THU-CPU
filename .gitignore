@@ -3,5 +3,7 @@
 !*.xise
 !/datapath/
 !/CPU/
+!/VGA/
+!/KEYBOARD/
 !.gitignore
 !*.vhd
