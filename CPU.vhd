@@ -45,7 +45,9 @@ entity CPU is
            ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
            led : out STD_LOGIC_VECTOR (15 downto 0);
 			  dyp1: out STD_LOGIC_VECTOR (6 downto 0);
-			  dyp0: out STD_LOGIC_VECTOR (6 downto 0));
+			  dyp0: out STD_LOGIC_VECTOR (6 downto 0);
+			  stallreq_from_if: in STD_LOGIC;
+			  stallreq_from_mem: in STD_LOGIC);
 end CPU;
 
 architecture Behavioral of CPU is
@@ -59,8 +61,6 @@ signal fakeled2: STD_LOGIC_VECTOR(15 downto 0);
 
 --CTRL_PROVIDE
 signal stall: STD_LOGIC_VECTOR(5 downto 0);
-signal stallreq_from_if: STD_LOGIC;
-signal stallreq_from_mem: STD_LOGIC;
 --IF_NEED
 
 
@@ -307,8 +307,7 @@ component CTRL
 end component;
 begin
 	 rom_addr<=pc_tmp;
-	 stallreq_from_if <= NoStop;
-	 stallreq_from_mem<= NoStop;
+
 	
     PC_component: PC port map(rst=>rst, clk=>clk, stall=>stall, branch_flag_in=>id_branch_flag_out,branch_target_addr_in=>id_branch_target_addr_out,pc=>pc_tmp,ce=>rom_ce);
 

@@ -62,7 +62,9 @@ Port(   rst:                in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
 
         load_finish:        out STD_LOGIC;
-		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
+		  dyp:					out STD_LOGIC_VECTOR(6 downto 0);
+          
+        ram_to_rom:         out STD_LOGIC);
 end RomRam;
 
 architecture Behavioral of RomRam is
@@ -72,6 +74,7 @@ architecture Behavioral of RomRam is
     constant inst_num : integer :=1023;
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
     signal   load_finish_temp:   STD_LOGIC;
+    signal   ram_to_rom_temp: STD_LOGIC;
     type InstArray is array (0 to inst_num) of STD_LOGIC_VECTOR(15 downto 0);
     signal insts: InstArray :=(
         "0000000000000000",
@@ -618,9 +621,21 @@ begin
 	 dyp(2) <= tsre;
 	 dyp(4) <= data_ready;
 	 dyp(6) <= load_finish_temp;
+     dyp(1) <= ram_to_rom_temp;
     load_finish <= load_finish_temp;
+    ram_to_rom <= ram_to_rom_temp;
     ram_read <= not(ram_ce) and not(ram_we); -- =1 when ram_ce=RamEnable and ram_we=Read
     ram_write <= not(ram_ce) and ram_we;		-- =1 when ram_ce=RamEnable and ram_we=Write
+    get_ram_to_rom:     process(ram_ce, ram_addr)
+                        begin
+                            if (ram_ce = RamEnable and ram_addr >= x"4000" and ram_addr < x"8000") then
+                                ram_to_rom_temp <= '1';
+                            else
+                                ram_to_rom_temp <= '0';
+                            end if;
+                        end process;
+
+
     get_clk_2:  process(clk)
                 begin
                     if (rising_edge(clk)) then
@@ -654,7 +669,7 @@ begin
 									end if;
 								end process;
 								
-    rom_control:process(rst, clk_4, rom_addr, rom_ce, now_addr, insts, load_finish_temp)
+    rom_control:process(rst, clk_4, rom_addr, rom_ce, now_addr, insts, load_finish_temp, ram_addr, ram_write_data, ram_to_rom_temp, ram_write, ram_read)
                 begin
                     if (rst = RstEnable) then   --rst之后重新从头load程序
                         Ram2OE <= '1';
@@ -663,9 +678,21 @@ begin
                         now_addr <= ZeroWord;
                     else    
                         if (load_finish_temp = '1') then --load完成，那么可以读指令
-                            Ram2OE <= '0';
-                            Ram2Addr <= "00" & rom_addr;
-                            Ram2Data <= ZzzzWord;
+                            if (ram_to_rom_temp = '1') then --处理监控程序的A和U指令
+                                if (ram_write = '1') then
+                                    Ram2OE <= '1';
+                                    Ram2Addr <= "00" & ram_addr;
+                                    Ram2Data <= ram_write_data;
+                                elsif (ram_read = '1') then
+                                    Ram2OE <= '0';
+                                    Ram2Addr <= "00" & ram_addr;
+                                    Ram2Data <= ZzzzWord;
+											end if;
+                            else
+                                Ram2OE <= '0';
+                                Ram2Addr <= "00" & rom_addr;
+                                Ram2Data <= ZzzzWord;
+                            end if;
                         else										--否则继续load下一条指
                             Ram2OE <= '1';
                             Ram2Addr <= "00" & now_addr;
@@ -677,12 +704,20 @@ begin
                     end if;
                 end process;
 
-    Ram2WE_control: process(rst, clk, load_finish_temp)
+    Ram2WE_control: process(rst, clk, load_finish_temp, ram_to_rom_temp, ram_read, ram_write)
                     begin
-                        if (rst = RstEnable or load_finish_temp = '1') then   --reset或者load完成的时候WE就始终为1，因为这时候只有读数据
+                        if (rst = RstEnable) then   --reset
                             Ram2WE <= '1';
+                        elsif (load_finish_temp = '0') then
+                            Ram2WE <= clk;          --载入未完成，写
+                        elsif (ram_to_rom_temp = '1') then -- ram操作转移到rom上
+                            if (ram_read = '1') then --读
+                                Ram2WE <= '1';
+                            else
+                                Ram2WE <= clk;       --写
+                            end if;
                         else
-                            Ram2WE <= clk;  --写的时候让WE和clk同步，相当于clk=1时，准备数据，clk拉下去的时候WE同时拉下并写入数
+                            Ram2WE <= '1';
                         end if;
                     end process;    
 
@@ -695,10 +730,7 @@ begin
 							  end if;
 						 end process;        
     
-    --rdn <= '1';
-    --wrn <= '1';
-    --Ram1EN <= RamEnable;
-    ram_control:process(rst, ram_read, ram_write, ram_addr, ram_write_data, tbre, tsre, data_ready)
+    ram_control:process(rst, ram_read, ram_write, ram_addr, ram_write_data, tbre, tsre, data_ready, ram_to_rom_temp)
                 begin
                     if (rst = RstEnable) then
                         Ram1EN <= RamEnable;
@@ -706,53 +738,62 @@ begin
                         Ram1Addr <= "00" & ZeroWord;
                         Ram1Data <= ZzzzWord;
                     else
-                        if (ram_read = ReadEnable) then
-                            if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果，
-                                Ram1EN <= RamEnable;
-                                Ram1OE <= '1';
-                                Ram1Addr <= "00" & ram_addr;
-                                if (tbre = '1' and tsre = '1' and data_ready = '1') then
-                                    Ram1Data <= x"0003";
-                                elsif (tbre = '1' and tsre = '1') then
-                                    Ram1Data <= x"0001";
-                                elsif (data_ready = '1') then
-                                    Ram1Data <= x"0002";
+                        if (ram_to_rom_temp = '1') then 
+                            Ram1EN <= RamDisable;
+                            Ram1OE <= '1';
+                            Ram1Addr <= "00" & ram_addr;
+                            Ram1Data <= ZeroWord;
+                            serial_read <= '0';
+                            serial_write <= '0';
+                        else
+                            if (ram_read = ReadEnable) then
+                                if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果，
+                                    Ram1EN <= RamEnable;
+                                    Ram1OE <= '1';
+                                    Ram1Addr <= "00" & ram_addr;
+                                    if (tbre = '1' and tsre = '1' and data_ready = '1') then
+                                        Ram1Data <= x"0003";
+                                    elsif (tbre = '1' and tsre = '1') then
+                                        Ram1Data <= x"0001";
+                                    elsif (data_ready = '1') then
+                                        Ram1Data <= x"0002";
+                                    else
+                                        Ram1Data <= x"0000";
+                                    end if;
+                                    serial_read <= '0';
+                                    serial_write<= '0';
+                                elsif (ram_addr = x"bf00") then --读取串口数据
+                                    Ram1EN <= RamDisable;
+                                    Ram1OE <= '1';
+                                    Ram1Addr <= "00" & ZeroWord;
+                                    Ram1Data <= ZzzzWord;
+                                    serial_read <= '1';
+                                    serial_write<= '0';
                                 else
-                                    Ram1Data <= x"0000";
-                                end if;
-                                serial_read <= '0';
-                                serial_write<= '0';
-                            elsif (ram_addr = x"bf00") then --读取串口数据
-                                Ram1EN <= RamDisable;
-                                Ram1OE <= '1';
-                                Ram1Addr <= "00" & ZeroWord;
-                                Ram1Data <= ZzzzWord;
-                                serial_read <= '1';
-                                serial_write<= '0';
-                            else
-                                Ram1EN <= RamEnable;
-                                Ram1OE <= '0';
-                                Ram1Addr <= "00" & ram_addr;
-                                Ram1Data <= ZzzzWord;
-                                serial_read <= '0';
-                                serial_write<= '0';
-                            end if;        
-                        elsif (ram_write = WriteEnable) then --写入串口数据
-                            if (ram_addr = x"bf00") then     
-                                Ram1EN <= RamDisable;
-                                Ram1OE <= '1';
-                                Ram1Addr <= "00" & ZeroWord;
-                                Ram1Data <= ram_write_data;
-                                serial_read <= '0';
-                                serial_write<= '1';
-                            else
-									     Ram1EN <= RamEnable;
-                                Ram1OE <= '1';
-                                Ram1Addr <= "00" & ram_addr;
-                                Ram1Data <= ram_write_data;     
-                                serial_read <= '0';
-                                serial_write<= '0'; 
-                            end if;         
+                                    Ram1EN <= RamEnable;
+                                    Ram1OE <= '0';
+                                    Ram1Addr <= "00" & ram_addr;
+                                    Ram1Data <= ZzzzWord;
+                                    serial_read <= '0';
+                                    serial_write<= '0';
+                                end if;        
+                            elsif (ram_write = WriteEnable) then --写入串口数据
+                                if (ram_addr = x"bf00") then     
+                                    Ram1EN <= RamDisable;
+                                    Ram1OE <= '1';
+                                    Ram1Addr <= "00" & ZeroWord;
+                                    Ram1Data <= ram_write_data;
+                                    serial_read <= '0';
+                                    serial_write<= '1';
+                                else
+                                            Ram1EN <= RamEnable;
+                                    Ram1OE <= '1';
+                                    Ram1Addr <= "00" & ram_addr;
+                                    Ram1Data <= ram_write_data;     
+                                    serial_read <= '0';
+                                    serial_write<= '0'; 
+                                end if;         
+                            end if;
                         end if;
                     end if;
                 end process;
@@ -788,15 +829,17 @@ begin
                         end if;
                     end process;
                     
-    Ram_read_out:  process(rst, ram_read, Ram1Data)
+    Ram_read_out:  process(rst, ram_read, Ram1Data, Ram2Data, ram_to_rom_temp)
 						 begin
 							  if (rst = RstEnable) then
 									ram_read_data <= ZeroWord;
 							  elsif (ram_read = ReadDisable) then
 									ram_read_data <= ZeroWord;
-							  else 
+							  elsif (ram_to_rom_temp = '1') then    --被转移到RAM2执行
+                                    ram_read_data <= Ram2Data;
+                              else
 									ram_read_data <= Ram1Data;
 							  end if;
-						 end process;
+						 end process; 
 end Behavioral;
 

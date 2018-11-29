@@ -47,12 +47,12 @@ begin
 			begin
 				if (rst = RstEnable) then
 					stall <= "000000";
-				elsif (stallreq_from_id = Stop) then
-					stall <= "000111";
+				elsif (stallreq_from_mem = Stop) then --order
+					stall <= "011111";
 				elsif (stallreq_from_if = Stop) then 
 					stall <= "001111";
-				elsif (stallreq_from_mem = Stop) then
-					stall <= "011111";
+				elsif (stallreq_from_id = Stop) then
+					stall <= "000111";
 				else
 					stall <= "000000";
 				end if;
