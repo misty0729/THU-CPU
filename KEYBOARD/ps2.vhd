@@ -21,7 +21,7 @@ library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 use IEEE.STD_LOGIC_ARITH.ALL;
-use WORK.DEFINES.ALL;
+-- use WORK.DEFINES.ALL;
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -61,7 +61,7 @@ begin
 	
 	main: process(rst_cpu, clk_cpu) is
 	begin
-		if rst_cpu = RstEnable then
+		if rst_cpu = '0' then
 			in_fin <= '0';
 			OE <= '0';
 			cstate <= delay;
