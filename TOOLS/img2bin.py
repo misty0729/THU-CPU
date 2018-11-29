@@ -23,9 +23,9 @@ print(img.size)
 n, m = img.size
 fp = open('ram2.data', 'w')
 pos = int(sys.argv[2], 16)
-for i in range(0, n):
-    for j in range(0, m):
-        r, g, b = img_array[i, j]
+for i in range(0, m):
+    for j in range(0, n):
+        r, g, b = img_array[j, i]
         color = int(b/32) * 64 + int(g/32) * 8 + int(r/32)
         fp.write("%06X=%04X\n" % (pos, color))
         pos = pos + 1
