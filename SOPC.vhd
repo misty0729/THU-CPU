@@ -55,7 +55,12 @@ entity SOPC is
 			  wrn:                out 		STD_LOGIC;
 			  tbre:					 in		STD_LOGIC;
 			  tsre:					 in		STD_LOGIC;
-			  data_ready:			 in		STD_LOGIC);
+			  data_ready:			 in		STD_LOGIC;
+           Hs:						 out		STD_LOGIC;
+           Vs:						 out  	STD_LOGIC;
+			  R:                  out 		STD_LOGIC_VECTOR (2 downto 0);
+			  G:						 out		STD_LOGIC_VECTOR (2 downto 0);
+			  B:						 out		STD_LOGIC_VECTOR (2 downto 0));
 end SOPC;
 
 
@@ -90,6 +95,11 @@ signal ram_addr :  STD_LOGIC_VECTOR (15 downto 0);
 
 --RAM_PROVIDE
 signal ram_read_data_in: STD_LOGIC_VECTOR (15 downto 0);
+
+--VGA_NEED
+signal vga_addr: STD_LOGIC_VECTOR (15 downto 0);
+signal vga_data: STD_LOGIC_VECTOR (15 downto 0);
+
 component CPU
     Port ( rst : in  STD_LOGIC;
            clk : in  STD_LOGIC;
@@ -154,7 +164,22 @@ Port(   rst:                in  STD_LOGIC;
 		  rom_success:			 out STD_LOGIC;
 
         load_finish:        out STD_LOGIC;
-		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
+		  dyp:					out STD_LOGIC_VECTOR(6 downto 0);
+			  vga_addr:				 in		STD_LOGIC_VECTOR (15 downto 0);
+			  vga_data:				 out		STD_LOGIC_VECTOR (15 downto 0)
+	);
+end component;
+
+component VGA is
+    Port ( clk : in  STD_LOGIC;
+           rst : in  STD_LOGIC;
+           R : out  STD_LOGIC_VECTOR (2 downto 0);
+           G : out  STD_LOGIC_VECTOR (2 downto 0);
+           B : out  STD_LOGIC_VECTOR (2 downto 0);
+           Hs : out  STD_LOGIC;
+           Vs : out  STD_LOGIC;
+			  vga_addr : out STD_LOGIC_VECTOR (15 downto 0);
+			  vga_data: in STD_LOGIC_VECTOR(15 downto 0));
 end component;
 begin
 
@@ -193,6 +218,8 @@ begin
 													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
 													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
-													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess);
+													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess, vga_addr => vga_addr, vga_data => vga_data);
+													
+	 VGA_component: VGA port map(clk => clk, rst => rst, R => R, G => G, B => B, Hs => Hs, Vs => Vs, vga_addr => vga_addr, vga_data => vga_data);
 end Behavioral;
 
