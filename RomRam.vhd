@@ -61,6 +61,7 @@ Port(   rst:                in  STD_LOGIC;
         tsre:               in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
         rom_success:        out STD_LOGIC;
+		  ram_success:			 out STD_LOGIC;
 
         load_finish:        out STD_LOGIC;
 		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
@@ -74,6 +75,7 @@ architecture Behavioral of RomRam is
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
     signal   load_finish_temp:   STD_LOGIC;
 	 signal   rom_success_temp: STD_LOGIC;
+	 signal   ram_ctrl: STD_LOGIC;
     type InstArray is array (0 to inst_num) of STD_LOGIC_VECTOR(15 downto 0);
     signal insts: InstArray :=(
         "0000000000000000",
@@ -619,6 +621,7 @@ begin
 	 rom_success <= rom_success_temp;
 	 dyp(5) <= rom_success_temp;
 	 dyp(0) <= tbre;
+	 dyp(1) <= ram_ctrl;
 	 dyp(2) <= tsre;
 	 dyp(4) <= data_ready;
 	 dyp(6) <= load_finish_temp;
@@ -645,6 +648,8 @@ begin
                         clk_8 <= not(clk_8);
                     end if;
                 end process;
+
+
 
     Ram2EN <= RamDisable;
 	 Ram2OE <= '1';
@@ -679,6 +684,22 @@ begin
                         --    Ram2WE <= clk;  --写的时候让WE和clk同步，相当于clk=1时，准备数据，clk拉下去的时候WE同时拉下并写入数
                      --   end if;
                    -- end process;         
+	ram_success <= not(ram_read and ram_ctrl);
+
+	ram_ctrl_state: process(clk,rst,ram_read, ram_write)
+	begin
+		if (rst = RstEnable) then
+			ram_ctrl <= '1';
+		else
+			if (rising_edge(clk)) then
+				if (ram_read = ReadEnable) then
+					ram_ctrl <= not(ram_ctrl);
+				else
+					ram_ctrl <= '1';
+				end if;
+			end if;
+		end if;
+	end process;
 
     check_load_finish:	process(rst, now_addr)
 						begin

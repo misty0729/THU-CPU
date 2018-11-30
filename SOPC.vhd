@@ -73,7 +73,8 @@ signal load_finish: STD_LOGIC;
 signal rst_for_cpu:	STD_LOGIC;
 signal rom_fail: STD_LOGIC;
 signal ram_fail: STD_LOGIC;
-signal rom_sucess: STD_LOGIC;
+signal rom_success: STD_LOGIC;
+signal ram_success: STD_LOGIC;
 
 --ROM_NEED
 signal rom_ce :  STD_LOGIC;
@@ -152,6 +153,7 @@ Port(   rst:                in  STD_LOGIC;
         tsre:               in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
 		  rom_success:			 out STD_LOGIC;
+		  ram_success:			 out STD_LOGIC;
 
         load_finish:        out STD_LOGIC;
 		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
@@ -178,10 +180,10 @@ begin
                         clk_8 <= not(clk_8);
                     end if;
                 end process;
-	 ram_fail <= '0';
-	 rom_fail <= not(rom_sucess);
+	 ram_fail <= not(ram_success);
+	 rom_fail <= not(rom_success);
 	 rst_for_cpu <= rst and load_finish;
-    CPU_component: CPU port map(clk=>clk_8, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
+    CPU_component: CPU port map(clk=>clk_step, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
                                 led=>led, dyp0=>fakedyp, dyp1=>dyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
 
@@ -193,6 +195,6 @@ begin
 													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
 													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
-													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess);
+													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_success, ram_success=>ram_success);
 end Behavioral;
 
