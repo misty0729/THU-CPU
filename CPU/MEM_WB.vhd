@@ -56,11 +56,11 @@ begin
 		if (rising_edge(clk)) then
 			if (rst = RstEnable) then
 				wb_reg_write <= WriteDisable;
-				wb_reg_addr <= ZERO_REGISTER;
+				wb_reg_addr <= NULL_REGISTER;
 				wb_reg_data <= ZeroWord;
 			elsif(stall(4)=Stop and stall(5)=NoStop) then
 				wb_reg_write <= WriteDisable;
-				wb_reg_addr <= ZERO_REGISTER;
+				wb_reg_addr <= NULL_REGISTER;
 				wb_reg_data <= ZeroWord;
 			elsif (stall(4)=NoStop) then
 				wb_reg_write <= mem_reg_write;

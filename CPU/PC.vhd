@@ -54,7 +54,7 @@ begin
 						if (rst = RstEnable) then
 							ce_tmp <= RamDisable;
 						else
-							ce_tmp <= RamEnabel;
+							ce_tmp <= RamEnable;
 						end if;
 					end if;
 				end process;
