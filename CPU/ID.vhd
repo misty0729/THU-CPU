@@ -104,11 +104,11 @@ begin
 						op_temp 						<= EXE_NOP_OP;
 						op_type_out 				<= EXE_NOP_TYPE;
 						reg_write_out 				<= WriteDisable;
-						reg_addr_out 				<= ZERO_REGISTER;
+						reg_addr_out 				<= NULL_REGISTER;
 						reg1_read_temp 				<= ReadDisable;
-						reg1_addr_temp 				<= ZERO_REGISTER;
+						reg1_addr_temp 				<= NULL_REGISTER;
 						reg2_read_temp 				<= ReadDisable;
-						reg2_addr_temp 				<= ZERO_REGISTER;
+						reg2_addr_temp 				<= NULL_REGISTER;
 						imm                        <= ZeroWord;
                   pc_plus_1                  <= "0000000000000001";
 						led <= "1111111111111111";
@@ -129,11 +129,11 @@ begin
 						op_temp 						<= EXE_NOP_OP;
 						op_type_out 				<= EXE_NOP_TYPE;
 						reg_write_out 				<= WriteDisable;
-						reg_addr_out 				<= ZERO_REGISTER;
+						reg_addr_out 				<= NULL_REGISTER;
 						reg1_read_temp 				<= ReadDisable;
-						reg1_addr_temp 				<= ZERO_REGISTER;
+						reg1_addr_temp 				<= NULL_REGISTER;
 						reg2_read_temp 				<= ReadDisable;
-						reg2_addr_temp 				<= ZERO_REGISTER;
+						reg2_addr_temp 				<= NULL_REGISTER;
                   imm                        <= ZeroWord;
                   pc_plus_1                  <= pc_in + "0000000000000001";
 						case op is
@@ -144,7 +144,6 @@ begin
 										op_type_out 				<= EXE_LOGIC_TYPE;
 										reg1_read_temp 				<= ReadEnable;
 										reg1_addr_temp 				<= y;
-										reg2_read_temp 				<= ReadDisable;
 										if (imm3 = "000") then
 											imm						<= EXT("1000",16);
 										else 
@@ -157,7 +156,6 @@ begin
 										op_type_out 				<= EXE_LOGIC_TYPE;
 										reg1_read_temp 				<= ReadEnable;
 										reg1_addr_temp 				<= y;
-										reg2_read_temp 				<= ReadDisable;
 										if (imm3 = "000") then
 											imm						<= EXT("1000",16);
 										else 
@@ -170,7 +168,6 @@ begin
 										op_type_out 				<= EXE_LOGIC_TYPE;
 										reg1_read_temp 				<= ReadEnable;
 										reg1_addr_temp 				<= y;
-										reg2_read_temp 				<= ReadDisable;
 										if (imm3 = "000") then
 											imm						<= EXT("1000",16);
 										else 
@@ -466,10 +463,7 @@ begin
 								reg_write_out						<= WriteEnable;
 								reg_addr_out						<= y;
 							
-							when "00000" =>
-								case x is
-									when "0000" =>	--NOP
-									when others =>	--ADDSP3 00000 rx imm
+							when "00000" =>		--ADDSP3 00000 rx imm
 										op_temp						<= EXE_ADDSP3_OP;
 										op_type_out					<= EXE_ARITH_TYPE;
 										reg1_read_temp				<= ReadEnable;
@@ -477,8 +471,9 @@ begin
 										imm							<= SXT(imm8,16);
 										reg_write_out				<= WriteEnable;
 										reg_addr_out				<= x;
-								end case;
 								
+							when "00001" =>		--NOP
+							
 							when "01001" =>		--ADDIU 01001 rx imm
 								op_temp								<= EXE_ADDIU_OP;
 								op_type_out							<= EXE_ARITH_TYPE;

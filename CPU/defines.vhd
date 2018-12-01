@@ -110,6 +110,7 @@ package defines is
 	constant T_REGISTER:		STD_LOGIC_VECTOR(3 downto 0)	:="1001";
 	constant RA_REGISTER:	STD_LOGIC_VECTOR(3 downto 0)	:="1010";
 	constant IH_REGISTER:	STD_LOGIC_VECTOR(3 downto 0)	:="1011";
+	constant NULL_REGISTER: STD_LOGIC_VECTOR(3 downto 0)  :="1111";
 	
 end defines;
 

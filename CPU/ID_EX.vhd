@@ -63,7 +63,7 @@ begin
                         ex_reg1_data <= ZeroWord;
                         ex_reg2_data <= ZeroWord;
                         ex_reg_write <= WriteDisable;
-                        ex_reg_addr <= ZERO_REGISTER;
+                        ex_reg_addr <= NULL_REGISTER;
                         ex_mem_write_data <= ZeroWord;
                     elsif (stall(2) = Stop and stall(3) = NoStop) then
                         ex_op <= EXE_NOP_OP;
@@ -71,7 +71,7 @@ begin
                         ex_reg1_data <= ZeroWord;
                         ex_reg2_data <= ZeroWord;
                         ex_reg_write <= WriteDisable;
-                        ex_reg_addr <= ZERO_REGISTER;
+                        ex_reg_addr <= NULL_REGISTER;
                         ex_mem_write_data <= ZeroWord;
                     elsif (stall(2) = NoStop) then 
                         ex_op <= id_op;
