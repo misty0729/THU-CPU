@@ -7,6 +7,6 @@
 !*.vhd
 !*.ucf
 !/TOOLS/
-!/Bit/
+!/BIT/
 !/FLASH/
 !/VGA/
