@@ -8,3 +8,5 @@
 !*.ucf
 !/TOOLS/
 !/Bit/
+!/FLASH/
+!/VGA/
