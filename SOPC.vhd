@@ -55,7 +55,16 @@ entity SOPC is
 			  wrn:                out 		STD_LOGIC;
 			  tbre:					 in		STD_LOGIC;
 			  tsre:					 in		STD_LOGIC;
-			  data_ready:			 in		STD_LOGIC);
+			  data_ready:			 in		STD_LOGIC;
+			  
+			  flash_byte : 		 out 		STD_LOGIC;--BYTE#
+			  flash_vpen : 		 out 		STD_LOGIC;
+			  flash_ce : 			 out 		STD_LOGIC;
+			  flash_oe : 			 out 		STD_LOGIC;
+			  flash_we : 			 out 		STD_LOGIC;
+			  flash_rp : 			 out 		STD_LOGIC;
+			  flash_addr : 		 out 		STD_LOGIC_VECTOR(22 downto 0);
+			  flash_data : 		 inout 	STD_LOGIC_VECTOR(15 downto 0));
 end SOPC;
 
 
@@ -123,7 +132,7 @@ component RAM
 			data_out: 	out  	STD_LOGIC_VECTOR (15 downto 0));
 end component;
 
-component RomRam
+component RomRam 
 Port(   rst:                in  STD_LOGIC;
         clk:                in  STD_LOGIC;
         
@@ -148,13 +157,23 @@ Port(   rst:                in  STD_LOGIC;
 		Ram1EN:             out STD_LOGIC;
 		rdn:                out STD_LOGIC;
 		wrn:                out STD_LOGIC;
-		  tbre:               in  STD_LOGIC;
+        tbre:               in  STD_LOGIC;
         tsre:               in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
-		  rom_success:			 out STD_LOGIC;
+        rom_success:        out STD_LOGIC;
 
         load_finish:        out STD_LOGIC;
-		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
+		  
+		  			  flash_byte : out STD_LOGIC;--BYTE#
+			  flash_vpen : out STD_LOGIC;
+			  flash_ce : out STD_LOGIC;
+			  flash_oe : out STD_LOGIC;
+			  flash_we : out STD_LOGIC;
+			  flash_rp : out STD_LOGIC;
+			  flash_addr : out STD_LOGIC_VECTOR(22 downto 0);
+			  flash_data : inout STD_LOGIC_VECTOR(15 downto 0);
+			  
+		dyp:				out STD_LOGIC_VECTOR(6 downto 0));
 end component;
 begin
 
@@ -181,18 +200,19 @@ begin
 	 ram_fail <= '0';
 	 rom_fail <= not(rom_sucess);
 	 rst_for_cpu <= rst and load_finish;
-    CPU_component: CPU port map(clk=>clk_8, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
+    CPU_component: CPU port map(clk=>clk_4, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
                                 led=>led, dyp0=>fakedyp, dyp1=>dyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
 
 --    ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 
 --    RAM_component: RAM port map(clk=>clk, ce=>ram_ce, we=>ram_we, data_in=>ram_write_data_out, addr=>ram_addr, data_out=>ram_read_data_in);
-	 RomRam_component: RomRam port map(clk=>clk_8, rst=>rst, 
+	 RomRam_component: RomRam port map(clk=>clk_4, rst=>rst, 
 													rom_ce=>rom_ce, rom_addr=>rom_addr, rom_read_data=>rom_read_data_in,
 													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
 													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
+													flash_byte=>flash_byte, flash_vpen=>flash_vpen, flash_ce=>flash_ce, flash_oe=>flash_oe, flash_we=>flash_we, flash_rp=>flash_rp, flash_addr=>flash_addr, flash_data=>flash_data,
 													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess);
 end Behavioral;
 
