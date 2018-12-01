@@ -51,10 +51,10 @@ entity flash_io is
 			  flash_addr : out std_logic_vector(22 downto 0);
 			  flash_data : inout std_logic_vector(15 downto 0);
 			  
-			  dyp0 : out std_logic_vector(6 downto 0)
+			  dyp0 : out std_logic_vector(6 downto 0);
+			  led: out std_logic_vector(15 downto 0));
 			  
            --ctl_read : in  STD_LOGIC
-	);
 end flash_io;
 
 architecture Behavioral of flash_io is
@@ -79,7 +79,7 @@ begin
 --	end process;
 
 	-- data_out <= flash_data;
-	
+	led <= flash_data;
 	main: process (clk, reset) is
 		variable state : flash_state := waiting;
 	begin

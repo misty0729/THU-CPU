@@ -167,4 +167,20 @@ NET "flash_data[13]" LOC = G3;
 NET "flash_data[14]" LOC = F2;
 NET "flash_data[15]" LOC = F1;
 
+NET "sw[0]"	LOC = T7;
+NET "sw[1]" LOC = R7;
+NET "sw[2]" LOC = U8;
+NET "sw[3]" LOC = V4;
+NET "sw[4]" LOC = V3;
+NET "sw[5]" LOC = V2;
+NET "sw[6]" LOC = U1;
+NET "sw[7]" LOC = R4;
+NET "sw[8]" LOC = R1;
+NET "sw[9]" LOC = N2;
+NET "sw[10]" LOC = N1;
+NET "sw[11]" LOC = M1;
+NET "sw[12]" LOC = K7;
+NET "sw[13]" LOC = K2;
+NET "sw[14]" LOC = J7;
+NET "sw[15]" LOC = J6;
 

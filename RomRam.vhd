@@ -73,7 +73,8 @@ Port(   rst:                in  STD_LOGIC;
 			  flash_addr : out STD_LOGIC_VECTOR(22 downto 0);
 			  flash_data : inout STD_LOGIC_VECTOR(15 downto 0);
 			  
-		dyp:				out STD_LOGIC_VECTOR(6 downto 0));
+		dyp:				out STD_LOGIC_VECTOR(6 downto 0);
+		led: 				out STD_LOGIC_VECTOR(15 downto 0));
 end RomRam;
 
 architecture Behavioral of RomRam is
@@ -106,7 +107,8 @@ component flash_io
 			  flash_rp : out STD_LOGIC;
 			  flash_addr : out STD_LOGIC_VECTOR(22 downto 0);
 			  flash_data : inout STD_LOGIC_VECTOR(15 downto 0);
-              dyp0 : out std_logic_vector(6 downto 0));
+              dyp0 : out std_logic_vector(6 downto 0);
+			  led:		out STD_LOGIC_VECTOR(15 downto 0));
 end component;
 
 begin
@@ -142,7 +144,7 @@ begin
                     end if;
                 end process;
 
-    flash_io_component: flash_io PORT MAP(addr=>now_addr, data_out=>flash_read_data, clk=>clk_8, reset=>rst_for_flash, flash_byte=>flash_byte, flash_vpen=>flash_vpen, flash_ce=>flash_ce, flash_oe=>flash_oe, flash_we=>flash_we, flash_rp=>flash_rp, flash_addr=>flash_addr, flash_data=>flash_data, dyp0=>dyp);
+    flash_io_component: flash_io PORT MAP(led=>led, addr=>now_addr, data_out=>flash_read_data, clk=>clk, reset=>rst_for_flash, flash_byte=>flash_byte, flash_vpen=>flash_vpen, flash_ce=>flash_ce, flash_oe=>flash_oe, flash_we=>flash_we, flash_rp=>flash_rp, flash_addr=>flash_addr, flash_data=>flash_data, dyp0=>dyp);
 
     Ram2EN <= RamEnable;
 				
