@@ -40,175 +40,34 @@ entity VGA is
            B : out  STD_LOGIC_VECTOR (2 downto 0);
            Hs : out  STD_LOGIC;
            Vs : out  STD_LOGIC;
-			  vga_block_addr : in STD_LOGIC_VECTOR (15 downto 0);
-			  vga_data_new : in STD_LOGIC_VECTOR(15 downto 0);
-			  ram_addr : out STD_LOGIC_VECTOR (15 downto 0);
-			  ram_data : in STD_LOGIC_VECTOR (15 downto 0);
+			  vga_pixel_addr : out STD_LOGIC_VECTOR (15 downto 0);
+			  vga_pixel_data : in  STD_LOGIC_VECTOR (15 downto 0);
+			  vga_read_data:	 in  STD_LOGIC_VECTOR (6 downto 0); 
+			  vga_read_addr:	 out STD_LOGIC_VECTOR (11 downto 0);
 			  led:		 out STD_LOGIC_VECTOR (15 downto 0);
 			  dyp0: out STD_LOGIC_VECTOR(6 downto 0);
 			  dyp1: out STD_LOGIC_VECTOR(6 downto 0));
 end VGA;
 
 architecture Behavioral of VGA is
-	type state is (r_addr, r_rgb);
 	signal clk_2 : STD_LOGIC;
 	signal i : integer := 0;
 	signal j : integer := 0;
 	constant block_size: integer:= 128;
-	signal c_state : state := r_addr;
 	constant start_addr : STD_LOGIC_VECTOR(15 downto 0) := "0001000000000000";
-	constant inst_num : integer := 2400;
-	type InstArray is array (0 to inst_num) of STD_LOGIC_VECTOR(15 downto 0);
-	signal ugly_vga_block : InstArray :=
-	("0000000000101001",
-"0000000000100011",
-"0000000000111110",
-"0000000000000100",
-"0000000001100001",
-"0000000001101100",
-"0000000001010110",
-"0000000000101110",
-"0000000001010010",
-"0000000000010000",
-"0000000001001001",
-"0000000001110001",
-"0000000001110001",
-"0000000000111011",
-"0000000001101001",
-"0000000001101011",
-"0000000000110011",
-"0000000000100110",
-"0000000001011011",
-"0000000000111100",
-"0000000000000111",
-"0000000000001100",
-"0000000000111110",
-"0000000000011001",
-"0000000000100100",
-"0000000001011110",
-"0000000000001101",
-"0000000000011100",
-"0000000000000110",
-"0000000000110111",
-"0000000001000111",
-"0000000001011110",
-"0000000000110011",
-"0000000000010010",
-"0000000001001101",
-"0000000001001000",
-"0000000001000011",
-"0000000000111011",
-"0000000000001011",
-"0000000000100110",
-"0000000000011111",
-"0000000000000011",
-"0000000001011010",
-"0000000001111101",
-"0000000000001001",
-"0000000000111000",
-"0000000000100101",
-"0000000000011111",
-"0000000001011101",
-"0000000001010100",
-"0000000001001011",
-"0000000001111100",
-"0000000000010110",
-"0000000001110101",
-"0000000001000101",
-"0000000000111011",
-"0000000000010011",
-"0000000000001101",
-"0000000000001001",
-"0000000000001010",
-"0000000000011100",
-"0000000001011011",
-"0000000000101110",
-"0000000000110010",
-"0000000000100000",
-"0000000000011010",
-"0000000001010000",
-"0000000001101110",
-"0000000001000000",
-"0000000001111000",
-"0000000000110110",
-"0000000001111101",
-"0000000000010010",
-"0000000001001001",
-"0000000000110010",
-"0000000001110110",
-"0000000000011110",
-"0000000001111101",
-"0000000001001001",
-"0000000001011100",
-"0000000000101101",
-"0000000001001111",
-"0000000000010100",
-"0000000001110010",
-"0000000001000100",
-"0000000001000000",
-"0000000001100110",
-"0000000001010000",
-"0000000001101011",
-"0000000001000100",
-"0000000000110000",
-"0000000000110111",
-"0000000000110010",
-"0000000000111011",
-"0000000000100001",
-"0000000000100010",
-"0000000001110110",
-"0000000000100010",
-"0000000000010001",
-"0000000000011101",
-"0000000001100001",
-"0000000000001011",
-"0000000000011111",
-"0000000001011010",
-"0000000000110000",
-"0000000001001010",
-"0000000000011001",
-"0000000000000010",
-"0000000000111001",
-"0000000001110010",
-"0000000000011101",
-"0000000001001001",
-"0000000000101100",
-"0000000000000000",
-"0000000001111110",
-"0000000001000101",
-"0000000000011001",
-"0000000001010101",
-"0000000001101001",
-"0000000000000000",
-"0000000000110010",
-"0000000001101010",
-"0000000001001001",
-"0000000001001100",
-"0000000001010011",
-"0000000000111111",
-"0000000001100111",
-"0000000001010110",
-	 others => ZeroWord);
 	signal block_i : integer;
 	signal block_j : integer;
 	signal offset_i : integer;
 	signal offset_j : integer;
 	signal block_addr : integer;
-	signal ram_addr_temp: STD_LOGIC_VECTOR(15 downto 0);
 begin
 	block_i <= i / 16;
 	offset_i <= i mod 16;
 	block_j <= j / 8;
 	offset_j <= j mod 8;
-   block_addr <= block_i * 80 + block_j;
-	dyp0<= conv_std_logic_vector(block_i,7);
-	dyp1<= conv_std_logic_vector(block_j,7);
-	--led(15 downto 8) <= conv_std_logic_vector(block_addr,8);
-	ram_addr_temp <= start_addr + conv_integer(ugly_vga_block(block_addr)) * block_size + offset_i * 8 + offset_j;
-	--led(7 downto 0) <= ram_addr_temp(7 downto 0);
-	--led <= ugly_vga_block(block_addr);
-	led <= ram_addr_temp;
-	ram_addr <= ram_addr_temp;
+   vga_read_addr <= conv_std_logic_vector(block_i * 80 + block_j, 12);
+	vga_pixel_addr <= start_addr + conv_integer(vga_read_data) * block_size + offset_i * 8 + offset_j;
+	led(6 downto 0) <= vga_read_data;
 	get_clk_2: process(clk) is
 	begin
 		if rising_edge(clk) then
@@ -216,15 +75,15 @@ begin
 		end if;
 	end process;
 	
-	display: process(i, j, ram_data) is 
+	display: process(i, j, vga_pixel_data) is 
 	begin
 		if i < 480 and j < 640 then
 --			R <= "111";
 --			G <= "000";
 --			B <= "000";
-			R <= ram_data(2 downto 0);
-			G <= ram_data(5 downto 3);
-			B <= ram_data(8 downto 6);
+			R <= vga_pixel_data(2 downto 0);
+			G <= vga_pixel_data(5 downto 3);
+			B <= vga_pixel_data(8 downto 6);
 		else
 			R <= "000";
 			G <= "000";

@@ -75,8 +75,12 @@ Port(   rst:                in  STD_LOGIC;
 			  
 		dyp:				out STD_LOGIC_VECTOR(6 downto 0);
 		led: 				out STD_LOGIC_VECTOR(15 downto 0);
-		  vga_addr:				in STD_LOGIC_VECTOR(15 downto 0);
-		  vga_data:				out STD_LOGIC_VECTOR(15 downto 0)
+		  vga_pixel_addr:				in STD_LOGIC_VECTOR(15 downto 0);
+		  vga_pixel_data:				out STD_LOGIC_VECTOR(15 downto 0);
+		  vga_write_enable: 			out STD_LOGIC_VECTOR(0 downto 0);
+		  vga_write_addr: 			out STD_LOGIC_VECTOR(11 downto 0);
+		  vga_write_data: 			out STD_LOGIC_VECTOR(6 downto 0);
+		  sw: in STD_LOGIC_VECTOR(15 downto 0)
 		  );
 end RomRam;
 
@@ -112,16 +116,24 @@ component flash_io
               dyp0 : out std_logic_vector(6 downto 0);
 			  led:		out STD_LOGIC_VECTOR(15 downto 0));
 end component;
-
+signal vga_write_addr_temp : STD_LOGIC_VECTOR(15 downto 0);
+signal fakedyp: STD_LOGIC_VECTOR(6 downto 0);
 begin
-	 
-	 
+	 vga_write_enable_control: process(ram_addr, ram_write)
+									begin
+											if (ram_addr = x"bf03" and ram_write = WriteEnable) then
+												vga_write_enable <= "1";
+											else
+												vga_write_enable <= "0";
+											end if;
+										end process;
 	 rom_success <= rom_success_temp;
 	 --dyp(5) <= rom_success_temp;
 	 --dyp(0) <= tbre;
 	 --dyp(2) <= tsre;
 	 --dyp(4) <= data_ready;
 	 --dyp(6) <= load_finish_temp;
+	 dyp<= ram_addr(6 downto 0);
     load_finish <= load_finish_temp;
     ram_read <= not(ram_ce) and not(ram_we); -- =1 when ram_ce=RamEnable and ram_we=Read
     ram_write <= not(ram_ce) and ram_we;		-- =1 when ram_ce=RamEnable and ram_we=Write
@@ -146,12 +158,12 @@ begin
                     end if;
                 end process;
 
-    flash_io_component: flash_io PORT MAP(led=>led, addr=>now_addr, data_out=>flash_read_data, clk=>clk, reset=>rst_for_flash, flash_byte=>flash_byte, flash_vpen=>flash_vpen, flash_ce=>flash_ce, flash_oe=>flash_oe, flash_we=>flash_we, flash_rp=>flash_rp, flash_addr=>flash_addr, flash_data=>flash_data, dyp0=>dyp);
+    flash_io_component: flash_io PORT MAP(led=>led, addr=>now_addr, data_out=>flash_read_data, clk=>clk, reset=>rst_for_flash, flash_byte=>flash_byte, flash_vpen=>flash_vpen, flash_ce=>flash_ce, flash_oe=>flash_oe, flash_we=>flash_we, flash_rp=>flash_rp, flash_addr=>flash_addr, flash_data=>flash_data, dyp0=>fakedyp);
 
     Ram2EN <= RamEnable;
-	 vga_data <= Ram2Data;
+	 vga_pixel_data <= Ram2Data;
 	
-    rom_control:process(rst, rom_addr, rom_ce, now_addr, load_finish_temp, flash_read_data, vga_addr)
+    rom_control:process(rst, rom_addr, rom_ce, now_addr, load_finish_temp, flash_read_data, vga_pixel_addr)
                 begin
                     if (rst = RstEnable) then   --rst之后重新从头load程序
                         Ram2OE <= '1';
@@ -160,7 +172,7 @@ begin
                     else    
                         if (load_finish_temp = '1') then --load完成，那么可以读指令
                             Ram2OE <= '0';
-                            Ram2Addr <= "00" & vga_addr;
+                            Ram2Addr <= "00" & vga_pixel_addr;
                             Ram2Data <= ZzzzWord;
                         else										--否则继续load下一条指
                             Ram2OE <= '1';
@@ -185,7 +197,14 @@ begin
 	 --Ram2Addr <= "00" & vga_addr;
 	 --vga_data <= Ram2Data;
 	 
-
+	 vga_write_addr_control: process(clk, vga_write_addr_temp, ram_write)
+		begin
+			if (rising_edge(clk) and ram_write = WriteEnable) then
+				vga_write_addr <= conv_std_logic_vector(conv_integer(vga_write_addr_temp(15 downto 8))*80+conv_integer(vga_write_addr_temp(7 downto 0)),12);
+			end if;
+		end process;
+		
+	 
     check_load_finish:	process(rst, now_addr)
 						begin
 							if (rst = RstEnable) then
@@ -272,6 +291,20 @@ begin
                                     Ram1Data <= ram_write_data;
                                     serial_read <= '0';
                                     serial_write<= '1';
+										  elsif (ram_addr = x"bf02") then  -- write vga_addr
+											   Ram1EN <= RamDisable;
+												Ram1OE <= '1';
+												Ram1Addr <= "00" & ZeroWord;
+												vga_write_addr_temp <= ram_write_data; 
+												serial_read <= '0';
+                                    serial_write<= '0'; 
+										  elsif (ram_addr = x"bf03") then
+												Ram1EN <= RamDisable;
+												Ram1OE <= '1';
+												Ram1Addr <= "00" & ZeroWord;
+												vga_write_data <= ram_write_data(6 downto 0); 
+												serial_read <= '0';
+                                    serial_write<= '0'; 
                                 else                             --正常写入数据
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '1';
