@@ -66,7 +66,8 @@ signal clk_4: STD_LOGIC;
 signal clk_8: STD_LOGIC;
 
 --DEBUG_NEED
-signal fakedyp: STD_LOGIC_VECTOR(6 downto 0);
+signal fakedyp0: STD_LOGIC_VECTOR(6 downto 0);
+signal fakedyp1: STD_LOGIC_VECTOR(6 downto 0);
 
 --CPU_NEED
 signal load_finish: STD_LOGIC;
@@ -82,8 +83,8 @@ signal rom_addr : STD_LOGIC_VECTOR (15 downto 0);
 signal rom_read_data_in: STD_LOGIC_VECTOR (15 downto 0);
 
 --RAM_NEED
-signal ram_ce :  STD_LOGIC;
-signal ram_we :  STD_LOGIC;
+signal ram_read :  STD_LOGIC;
+signal ram_write :  STD_LOGIC;
 signal ram_write_data_out :  STD_LOGIC_VECTOR (15 downto 0);
 signal ram_addr :  STD_LOGIC_VECTOR (15 downto 0);
 
@@ -96,8 +97,8 @@ component CPU
            ram_read_data_in : in  STD_LOGIC_VECTOR (15 downto 0);
            rom_ce : out  STD_LOGIC;
            rom_addr : out  STD_LOGIC_VECTOR (15 downto 0);
-           ram_ce : out  STD_LOGIC;
-           ram_we : out  STD_LOGIC;
+           ram_read : out  STD_LOGIC;
+           ram_write : out  STD_LOGIC;
            ram_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
            ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
            led: out STD_LOGIC_VECTOR(15 downto 0);
@@ -135,8 +136,8 @@ Port(   rst:                in  STD_LOGIC;
 		Ram2WE:             out STD_LOGIC;
 		Ram2EN:             out STD_LOGIC;
 
-        ram_ce :            in  STD_LOGIC;
-        ram_we :            in  STD_LOGIC;
+        ram_read :            in  STD_LOGIC;
+        ram_write :            in  STD_LOGIC;
         ram_write_data :    in  STD_LOGIC_VECTOR (15 downto 0);
         ram_addr :          in  STD_LOGIC_VECTOR (15 downto 0);
         ram_read_data :     out  STD_LOGIC_VECTOR (15 downto 0);
@@ -179,16 +180,17 @@ begin
                 end process;
 	 ram_fail <= '0';
 	 rst_for_cpu <= rst and load_finish;
-    CPU_component: CPU port map(clk=>clk, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
-                                ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
-                                led=>led, dyp0=>fakedyp, dyp1=>dyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
+	 dyp1 <= "0000000";
+    CPU_component: CPU port map(clk=>clk_2, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
+                                ram_read_data_in=>ram_read_data_in, ram_read=>ram_read, ram_write=>ram_write, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
+                                led=>led, dyp0=>fakedyp0, dyp1=>fakedyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
 
 --    ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 
 --    RAM_component: RAM port map(clk=>clk, ce=>ram_ce, we=>ram_we, data_in=>ram_write_data_out, addr=>ram_addr, data_out=>ram_read_data_in);
-	 RomRam_component: RomRam port map(clk=>clk, rst=>rst, 
+	 RomRam_component: RomRam port map(clk=>clk_2, rst=>rst, 
 													rom_ce=>rom_ce, rom_addr=>rom_addr, rom_read_data=>rom_read_data_in,
-													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
+													ram_read=>ram_read, ram_write=>ram_write, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
 													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
 													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, ram_to_rom=>rom_fail);

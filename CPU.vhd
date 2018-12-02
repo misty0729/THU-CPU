@@ -39,8 +39,8 @@ entity CPU is
            ram_read_data_in : in  STD_LOGIC_VECTOR (15 downto 0);
            rom_ce : out  STD_LOGIC;
            rom_addr : out  STD_LOGIC_VECTOR (15 downto 0);
-           ram_ce : out  STD_LOGIC;
-           ram_we : out  STD_LOGIC;
+           ram_read : out  STD_LOGIC;
+           ram_write : out  STD_LOGIC;
            ram_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
            ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
            led : out STD_LOGIC_VECTOR (15 downto 0);
@@ -263,8 +263,8 @@ component MEM
 		--写入内存的数
 		mem_data_out : out STD_LOGIC_VECTOR(15 downto 0);
 		--操作ram1读写的两个使能端
-		mem_we_out : out STD_LOGIC;
-		mem_ce_out : out STD_LOGIC);
+		mem_read_out : out STD_LOGIC;
+		mem_write_out : out STD_LOGIC);
 end component;
 
 component MEM_WB
@@ -320,7 +320,7 @@ begin
                             reg_write_out=>id_reg_write_out, reg_addr_out=>id_reg_addr_out, 
                             mem_write_data_out=>id_mem_write_data_out, branch_flag_out=>id_branch_flag_out, branch_target_addr_out=>id_branch_target_addr_out,
                             reg1_read_out=>id_reg1_read_out, reg1_addr_out=>id_reg1_addr_out, reg2_read_out=>id_reg2_read_out,reg2_addr_out=>id_reg2_addr_out,
-                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>led);
+                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>fakeled2);
 
     ID_EX_component: ID_EX port map(rst=>rst, clk=>clk, id_op=>id_op_out, id_op_type=>id_op_type_out, id_reg1_data=>id_reg1_data_out,id_reg2_data=>id_reg2_data_out,
                                     id_reg_write=>id_reg_write_out, id_reg_addr=>id_reg_addr_out, id_mem_write_data=>id_mem_write_data_out,
@@ -342,7 +342,7 @@ begin
 
     MEM_component: MEM port map(rst=>rst, op_type_in=>mem_op_type_in,reg_write_in=>mem_reg_write_in, reg_addr_in=>mem_reg_addr_in, reg_data_in=>mem_reg_data_in, mem_addr_in=>mem_mem_addr_in,
                                 mem_write_data_in=>mem_mem_write_data_in,reg_write_out=>mem_reg_write_out, reg_addr_out=>mem_reg_addr_out,
-                                reg_data_out=>mem_reg_data_out, mem_addr_out=>ram_addr, mem_data_out=>ram_write_data_out, mem_we_out=>ram_we, mem_ce_out=>ram_ce,
+                                reg_data_out=>mem_reg_data_out, mem_addr_out=>ram_addr, mem_data_out=>ram_write_data_out, mem_read_out=>ram_read, mem_write_out=>ram_write,
 										  mem_read_data_in=>ram_read_data_in);
 
     
@@ -353,7 +353,7 @@ begin
 
     REG_component: REG port map(rst=>rst, clk=>clk, re1=>id_reg1_read_out, raddr1=>id_reg1_addr_out, re2=>id_reg2_read_out, raddr2=>id_reg2_addr_out,
                                 we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in
-										  ,led=>fakeled2);
+										  ,led=>led);
 
     CTRL_component: CTRL port map(rst=>rst, stallreq_from_id=>id_stallreq_out, stallreq_from_if=>stallreq_from_if,stallreq_from_mem=>stallreq_from_mem, stall=>stall);
 end Behavioral;
