@@ -44,31 +44,32 @@ end PC;
 
 architecture Behavioral of PC is
 	signal pc_tmp: STD_LOGIC_VECTOR (15 downto 0) := ZeroWord;
+	signal ce_tmp: STD_LOGIC;
 begin
 	pc <= pc_tmp;
-	
-	pc_arr: process(clk, rst, branch_flag_in, branch_target_addr_in) is
-	begin
-		if rst = RstEnable then
-			pc_tmp <= ZeroWord;
-		elsif rising_edge(clk) then
-			if stall(0) = Stop then
-				pc_tmp <= pc_tmp;
-			elsif branch_flag_in = '1' then
-				pc_tmp <= branch_target_addr_in;
-			else
-				pc_tmp <= pc_tmp + '1';
-			end if;
-		end if;
-	end process pc_arr;
-	
-	ce_arr: process(clk, rst) is
+	ce <= ce_tmp;
+	get_ce: process(clk)
+				begin
+					if (rising_edge(clk)) then
+						if (rst = RstEnable) then
+							ce_tmp <= RamDisable;
+						else
+							ce_tmp <= RamEnable;
+						end if;
+					end if;
+				end process;
+				
+	arr: process(clk)
 	begin
 		if rising_edge(clk) then
-			if rst = RstEnable then
-				ce <= RamDisable;
-			else 
-				ce <= RamEnable;
+			if ce_tmp = RamDisable then
+				pc_tmp <= ZeroWord;
+			elsif stall(0) = NoStop then
+				if branch_flag_in = Branch then
+					pc_tmp <= branch_target_addr_in;
+				else
+					pc_tmp <= pc_tmp + '1';
+				end if;
 			end if;
 		end if;
 	end process;

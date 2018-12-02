@@ -60,11 +60,10 @@ Port(   rst:                in  STD_LOGIC;
         tbre:               in  STD_LOGIC;
         tsre:               in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
+        rom_success:        out STD_LOGIC;
 
         load_finish:        out STD_LOGIC;
-		  dyp:					out STD_LOGIC_VECTOR(6 downto 0);
-          
-        ram_to_rom:         out STD_LOGIC);
+		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
 end RomRam;
 
 architecture Behavioral of RomRam is
@@ -73,7 +72,7 @@ architecture Behavioral of RomRam is
     constant inst_num : integer :=1023;
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
     signal   load_finish_temp:   STD_LOGIC;
-    signal   ram_to_rom_temp: STD_LOGIC;
+	 signal   rom_success_temp: STD_LOGIC;
     type InstArray is array (0 to inst_num) of STD_LOGIC_VECTOR(15 downto 0);
     signal insts: InstArray :=(
 		"0110100101010101", --LI R1 55
@@ -97,6 +96,8 @@ architecture Behavioral of RomRam is
     signal serial_read:     STD_LOGIC;
     signal serial_write:    STD_LOGIC;
 begin
+	 rom_success <= rom_success_temp;
+	 dyp(5) <= rom_success_temp;
 	 dyp(0) <= tbre;
 	 dyp(2) <= tsre;
 	 dyp(4) <= data_ready;
@@ -183,45 +184,39 @@ begin
                         if (rst = RstEnable) then   --reset
                             Ram2WE <= '1';
                         elsif (load_finish_temp = '0') then
-                            Ram2WE <= clk;          --载入未完成，�
-                        elsif (ram_to_rom_temp = '1') then -- ram操作转移到rom�
-                            if (ram_read = '1') then --�
+                            Ram2WE <= clk;          --载入未完成，�
+                        elsif (ram_to_rom_temp = '1') then -- ram操作转移到rom�
+                            if (ram_read = '1') then --�
                                 Ram2WE <= '1';
                             else
-                                Ram2WE <= clk;       --�
+                                Ram2WE <= clk;       --�
                             end if;
-                        else
-                            Ram2WE <= '1';
-                        end if;
-                    end process;    
+                        end process;
 
-    Rom_read_out:  process(rst, Ram2Data)
-						 begin
-							  if (rst = RstEnable) then
-									rom_read_data <= NopInst;
-							  else    
-									rom_read_data <= Ram2Data;
-							  end if;
-						 end process;        
-    
-    ram_control:process(rst, ram_read, ram_write, ram_addr, ram_write_data, tbre, tsre, data_ready, ram_to_rom_temp)
+    ram_control:process(rst, clk_8, ram_read, ram_write, ram_addr, ram_write_data, tbre, tsre, data_ready, rom_addr, rom_ce, load_finish_temp, now_addr, insts)
                 begin
                     if (rst = RstEnable) then
                         Ram1EN <= RamEnable;
                         Ram1OE <= '1';
                         Ram1Addr <= "00" & ZeroWord;
                         Ram1Data <= ZzzzWord;
+								now_addr <= ZeroWord;
+								serial_read <= '0';
+								serial_write <= '0';
                     else
-                        if (ram_to_rom_temp = '1') then 
-                            Ram1EN <= RamDisable;
+                        if (load_finish_temp = '0') then        --从flash里读取数据
+                            Ram1EN <= RamEnable;
                             Ram1OE <= '1';
-                            Ram1Addr <= "00" & ram_addr;
-                            Ram1Data <= ZeroWord;
-                            serial_read <= '0';
-                            serial_write <= '0';
+                            Ram1Addr <= "00" & now_addr;
+                            Ram1Data <= insts(conv_integer(now_addr));
+									 if (rising_edge(clk_8)) then
+										now_addr <= now_addr + 1;
+									 end if;
+									 serial_read <= '0';
+									 serial_write <= '0';
                         else
                             if (ram_read = ReadEnable) then
-                                if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果�
+                                if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果�
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '1';
                                     Ram1Addr <= "00" & ram_addr;
@@ -243,7 +238,7 @@ begin
                                     Ram1Data <= ZzzzWord;
                                     serial_read <= '1';
                                     serial_write<= '0';
-                                else
+                                else                            --正常读取数据
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '0';
                                     Ram1Addr <= "00" & ram_addr;
@@ -267,7 +262,21 @@ begin
                                     serial_read <= '0';
                                     serial_write<= '0'; 
                                 end if;         
-                            end if;
+                            elsif (rom_ce = RamEnable) then                             
+                                Ram1EN <= RamEnable;
+                                Ram1OE <= '0';
+                                Ram1Addr <= "00" & rom_addr;
+                                Ram1Data <= ZzzzWord;
+                                serial_read <= '0';
+                                serial_write<= '0';
+                            else
+                                Ram1EN <= RamDisable;
+                                Ram1OE <= '0';
+                                Ram1Addr <= "00" & ZeroWord;
+                                Ram1Data <= ZzzzWord;
+                                serial_read <= '0';
+                                serial_write <= '0';
+                            end if;       
                         end if;
                     end if;
                 end process;
@@ -276,7 +285,7 @@ begin
                     begin
                         if (rst = RstEnable or load_finish_temp = '0' or ram_write = '0') then
                             wrn <= '1';
-                        elsif (serial_write = '1') then     --单周期写串口（我只管写，什么时候收到我不管�
+                        elsif (serial_write = '1') then     --单周期写串口（我只管写，什么时候收到我不管�
                             wrn <= clk;
                         else 
                             wrn <= '1';
@@ -287,7 +296,7 @@ begin
                     begin
                         if (rst = RstEnable or load_finish_temp = '0' or ram_read = '0') then
                             rdn <= '1';
-                        elsif (serial_read = '1') then      --单周期读串口（因为只有在data_ready�时才会读，所以可以省掉状态机，直接rdn一上一下，下去的时候就读出数据了）
+                        elsif (serial_read = '1') then      --单周期读串口（因为只有在data_ready�时才会读，所以可以省掉状态机，直接rdn一上一下，下去的时候就读出数据了）
                             rdn <= clk; 
                         else 
                             rdn <= '1';
@@ -296,24 +305,28 @@ begin
 
     Ram1WE_control: process(rst, clk,ram_read)
                     begin 
-                        if (rst = RstEnable or ram_read = ReadEnable) then    --当读的时候WE始终
+                        if (rst = RstEnable or ram_read = ReadEnable or ram_addr = x"bf00" or ram_addr = x"bf01") then    --当读的时候WE始终
                             Ram1WE <= '1';
-                        else    
+                        elsif ((load_finish_temp = '1' and ram_write = WriteEnable) or (load_finish_temp = '0')) then    
                             Ram1WE <= clk;  --写的时候让WE和clk同步，刚到上升沿的时候准备数据和地址，然后clk下降，WE拉下来，写入数据  
+								else 
+									 Ram1WE <= '1';
                         end if;
                     end process;
                     
-    Ram_read_out:  process(rst, ram_read, Ram1Data, Ram2Data, ram_to_rom_temp)
+    Ram_read_out:  process(Ram1Data)
 						 begin
-							  if (rst = RstEnable) then
-									ram_read_data <= ZeroWord;
-							  elsif (ram_read = ReadDisable) then
-									ram_read_data <= ZeroWord;
-							  elsif (ram_to_rom_temp = '1') then    --被转移到RAM2执行
-                                    ram_read_data <= Ram2Data;
-                              else
-									ram_read_data <= Ram1Data;
-							  end if;
-						 end process; 
-end Behavioral;
+								ram_read_data <= Ram1Data;
+						 end process;
 
+    Rom_read_out:   process(rst, rom_success_temp, Ram1Data, load_finish_temp, rom_ce)
+					begin
+					   if (rst = RstEnable) then
+							rom_read_data <= NopInst;
+						elsif (rom_success_temp = '1' and load_finish_temp = '1' and rom_ce = RamEnable) then    
+							rom_read_data <= Ram1Data;
+                  else
+                     rom_read_data <= NopInst;
+						end if;
+					end process;  
+end Behavioral;

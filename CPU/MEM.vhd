@@ -68,7 +68,7 @@ begin
 		if(rst = RstEnable) then
 			reg_write_out <= WriteDisable;
 			reg_data_out <= ZeroWord;
-			reg_addr_out <= ZERO_REGISTER;
+			reg_addr_out <= NULL_REGISTER;
 			mem_addr_out <= ZeroWord;
 			mem_data_out <= ZeroWord;
 			mem_read_out <= '0'; -- =1 when ram_ce=RamEnable=0 and ram_we=Read

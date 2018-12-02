@@ -69,7 +69,7 @@ begin
 				begin
 					if (rising_edge(clk)) then
 						if (rst = RstDisable) then
-							if (we = WriteEnable and waddr /= ZERO_REGISTER) then
+							if (we = WriteEnable) then
 								regist(conv_integer(waddr)) <= wdata;
 							end if;
 						end if;
@@ -81,9 +81,7 @@ begin
 					if (rst = RstEnable) then
 						rdata1 <= ZeroWord;
 					elsif (re1 = ReadEnable) then
-						if (raddr1 = ZERO_REGISTER) then
-							rdata1 <= ZeroWord;
-						elsif (we = WriteEnable and raddr1 = waddr) then
+						if (we = WriteEnable and raddr1 = waddr) then
 							rdata1 <= wdata;
 						else 
 							rdata1 <= regist(conv_integer(raddr1));
@@ -98,9 +96,7 @@ begin
 					if (rst = RstEnable) then
 						rdata2 <= ZeroWord;
 					elsif (re2 = ReadEnable) then
-						if (raddr2 = ZERO_REGISTER) then
-							rdata2 <= ZeroWord;
-						elsif (we = WriteEnable and raddr2 = waddr) then
+						if (we = WriteEnable and raddr2 = waddr) then
 							rdata2 <= wdata;
 						else 
 							rdata2 <= regist(conv_integer(raddr2));

@@ -52,10 +52,10 @@ begin
 				if (rst = RstEnable) then
 					id_pc <= ZeroWord;
 					id_inst <= ZeroWord;
-				elsif (stall(0) = Stop and stall(1) = NoStop) then
+				elsif (stall(1) = Stop and stall(2) = NoStop) then
 					id_pc <= ZeroWord;
 					id_inst <= ZeroWord;
-				elsif (stall(0) = NoStop) then
+				elsif (stall(1) = NoStop) then
 					id_pc <= if_pc;
 					id_inst <= if_inst;
 				end if;
