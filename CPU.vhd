@@ -39,8 +39,8 @@ entity CPU is
            ram_read_data_in : in  STD_LOGIC_VECTOR (15 downto 0);
            rom_ce : out  STD_LOGIC;
            rom_addr : out  STD_LOGIC_VECTOR (15 downto 0);
-           ram_ce : out  STD_LOGIC;
-           ram_we : out  STD_LOGIC;
+           ram_read : out  STD_LOGIC;
+           ram_write : out  STD_LOGIC;
            ram_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
            ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
            led : out STD_LOGIC_VECTOR (15 downto 0);
@@ -263,8 +263,8 @@ component MEM
 		--写入内存的数
 		mem_data_out : out STD_LOGIC_VECTOR(15 downto 0);
 		--操作ram1读写的两个使能端
-		mem_we_out : out STD_LOGIC;
-		mem_ce_out : out STD_LOGIC);
+		mem_read_out : out STD_LOGIC;
+		mem_write_out : out STD_LOGIC);
 end component;
 
 component MEM_WB
@@ -342,7 +342,7 @@ begin
 
     MEM_component: MEM port map(rst=>rst, op_type_in=>mem_op_type_in,reg_write_in=>mem_reg_write_in, reg_addr_in=>mem_reg_addr_in, reg_data_in=>mem_reg_data_in, mem_addr_in=>mem_mem_addr_in,
                                 mem_write_data_in=>mem_mem_write_data_in,reg_write_out=>mem_reg_write_out, reg_addr_out=>mem_reg_addr_out,
-                                reg_data_out=>mem_reg_data_out, mem_addr_out=>ram_addr, mem_data_out=>ram_write_data_out, mem_we_out=>ram_we, mem_ce_out=>ram_ce,
+                                reg_data_out=>mem_reg_data_out, mem_addr_out=>ram_addr, mem_data_out=>ram_write_data_out, mem_read_out=>ram_read, mem_write_out=>ram_write,
 										  mem_read_data_in=>ram_read_data_in);
 
     
