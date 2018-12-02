@@ -74,11 +74,8 @@ signal clk_6_25: STD_LOGIC;
 signal fakedyp: STD_LOGIC_VECTOR(6 downto 0);
 
 --CPU_NEED
-signal load_finish: STD_LOGIC;
-signal rst_for_cpu:	STD_LOGIC;
 signal rom_fail: STD_LOGIC;
 signal ram_fail: STD_LOGIC;
-signal rom_sucess: STD_LOGIC;
 
 --ROM_NEED
 signal rom_ce :  STD_LOGIC;
@@ -88,6 +85,7 @@ signal rom_addr : STD_LOGIC_VECTOR (15 downto 0);
 signal rom_read_data_in: STD_LOGIC_VECTOR (15 downto 0);
 
 --RAM_NEED
+signal ram_ce : STD_LOGIC;
 signal ram_read :  STD_LOGIC;
 signal ram_write :  STD_LOGIC;
 signal ram_write_data_out :  STD_LOGIC_VECTOR (15 downto 0);
@@ -104,6 +102,7 @@ component CPU
            rom_addr : out  STD_LOGIC_VECTOR (15 downto 0);
            ram_read : out  STD_LOGIC;
            ram_write : out  STD_LOGIC;
+			  ram_ce:  out STD_LOGIC;
            ram_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
            ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
            led: out STD_LOGIC_VECTOR(15 downto 0);
@@ -113,20 +112,6 @@ component CPU
 			  stallreq_from_mem: in STD_LOGIC);
 end component;
 
-component ROM 
-    Port(   addr   :   in  STD_LOGIC_VECTOR(15 downto 0);
-            ce     :   in  STD_LOGIC;
-            data   :   out STD_LOGIC_VECTOR(15 downto 0));
-end component;
-
-component RAM
-	Port(	ce:			in		STD_LOGIC;
-			we:			in		STD_LOGIC;
-			data_in:	in		STD_LOGIC_VECTOR (15 downto 0);
-			addr:		in  	STD_LOGIC_VECTOR (15 downto 0);
-			clk:		in  	STD_LOGIC;
-			data_out: 	out  	STD_LOGIC_VECTOR (15 downto 0));
-end component;
 
 component RomRam
 Port(   rst:                in  STD_LOGIC;
@@ -140,7 +125,7 @@ Port(   rst:                in  STD_LOGIC;
 		Ram2OE:             out  STD_LOGIC;
 		Ram2WE:             out STD_LOGIC;
 		Ram2EN:             out STD_LOGIC;
-
+		  ram_ce: 				in STD_LOGIC;
         ram_read :            in  STD_LOGIC;
         ram_write :            in  STD_LOGIC;
         ram_write_data :    in  STD_LOGIC_VECTOR (15 downto 0);
@@ -156,10 +141,8 @@ Port(   rst:                in  STD_LOGIC;
 		  tbre:               in  STD_LOGIC;
         tsre:               in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
-		  rom_success:			 out STD_LOGIC;
-
-        load_finish:        out STD_LOGIC;
-		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
+		  dyp:					out STD_LOGIC_VECTOR(6 downto 0);
+		  clk_200:		in STD_LOGIC);
 end component;
 
 component CLKGAIN
@@ -211,12 +194,11 @@ begin
 						end case;
 				end process;
 	 ram_fail <= '0';
-	 rom_fail <= not(rom_sucess);
-	 rst_for_cpu <= rst and load_finish;
+	 rom_fail <= ram_ce;
 	 clkgain_component : CLKGAIN port map(CLKIN_IN=>clk, RST_IN=>RstEnable, CLKFX_OUT=>clk_40, CLKDV_OUT=>clk_33_3);
-	 CPU_component: CPU port map(clk=>clk_chose, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
+	 CPU_component: CPU port map(clk=>clk_chose, rst=>rst, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_read=>ram_read, ram_write=>ram_write, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
-                                led=>led, dyp0=>fakedyp, dyp1=>dyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
+                                led=>led, dyp0=>fakedyp, dyp1=>dyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail, ram_ce=>ram_ce);
 
 --    ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 
@@ -226,6 +208,6 @@ begin
 													ram_read=>ram_read, ram_write=>ram_write, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
 													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
-													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess);
+													tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, ram_ce=>ram_ce, clk_200=>clk_40);
 end Behavioral;
 
