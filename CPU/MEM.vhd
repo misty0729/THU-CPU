@@ -34,16 +34,16 @@ use WORK.DEFINES.ALL;
 
 entity MEM is 
 	Port (
-		--指令的类别
+		--指令的类�
 		op_type_in : in STD_LOGIC_VECTOR (2 downto 0);
-		--写使能
+		--写使�
 		reg_write_in : in STD_LOGIC;
 		reg_addr_in : in STD_LOGIC_VECTOR(3 downto 0);
 		--写入寄存器的数据
 		reg_data_in : in STD_LOGIC_VECTOR(15 downto 0);
-		--读/写的内存地址
+		--�写的内存地址
 		mem_addr_in : in STD_LOGIC_VECTOR(15 downto 0);
-		--写入内存的数据
+		--写入内存的数�
 		mem_write_data_in : in STD_LOGIC_VECTOR(15 downto 0);
 		mem_read_data_in : in STD_LOGIC_VECTOR(15 downto 0);
 		rst : in STD_LOGIC;
@@ -52,13 +52,13 @@ entity MEM is
 		reg_addr_out : out STD_LOGIC_VECTOR(3 downto 0);
 		reg_data_out : out STD_LOGIC_VECTOR(15 downto 0);
 
-		--读/写内存地址
+		--�写内存地址
 		mem_addr_out : out STD_LOGIC_VECTOR(15 downto 0);
-		--写入内存的数据
+		--写入内存的数�
 		mem_data_out : out STD_LOGIC_VECTOR(15 downto 0);
-		--操作ram1读写的两个使能端口
-		mem_we_out : out STD_LOGIC;
-		mem_ce_out : out STD_LOGIC);
+		--操作ram1读写的两个使能端�
+		mem_read_out : out STD_LOGIC;
+		mem_write_out : out STD_LOGIC);
 end MEM;
 
 architecture Behavioral of MEM is
@@ -71,10 +71,10 @@ begin
 			reg_addr_out <= NULL_REGISTER;
 			mem_addr_out <= ZeroWord;
 			mem_data_out <= ZeroWord;
-			mem_ce_out <= RamDisable;
-			mem_we_out <= Write;
+			mem_read_out <= '0';
+			mem_write_out <= '0';
 		else 
-			--固定传出值
+			--固定传出�
 			reg_write_out <= reg_write_in;
 			reg_addr_out <= reg_addr_in;
 			case op_type_in is
@@ -82,23 +82,23 @@ begin
 				when "101" =>
 					mem_addr_out <= mem_addr_in;
 					mem_data_out <= ZeroWord;
-					mem_we_out <= Read;
-					mem_ce_out <= RamEnable;
+					mem_read_out <= '1';
+					mem_write_out <= '0';
 					reg_data_out <= mem_read_data_in;
 				--store 指令
 				when "111" =>
 					mem_addr_out <= mem_addr_in;
 					mem_data_out <= mem_write_data_in;
-					mem_we_out <= Write;
+					mem_read_out <= '0';
 					reg_data_out <= reg_data_in;
-					mem_ce_out <= RamEnable;
-				-- 不需要访问和修改内存的指令
+					mem_write_out <= '1';
+				-- 不需要访问和修改内存的指�
 				when others => 
 					reg_data_out <= reg_data_in;
-					mem_ce_out <= RamDisable;
+					mem_read_out <= '0';
 					mem_addr_out <= ZeroWord;
 					mem_data_out <= ZeroWord;
-					mem_we_out <= Write;
+					mem_write_out <= '0';
 			end case;
 		end if;
 	end process;

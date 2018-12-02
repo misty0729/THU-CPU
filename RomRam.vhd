@@ -45,8 +45,8 @@ Port(   rst:                in  STD_LOGIC;
 		Ram2WE:             out STD_LOGIC;
 		Ram2EN:             out STD_LOGIC;
 
-        ram_ce :            in  STD_LOGIC;
-        ram_we :            in  STD_LOGIC;
+        ram_read :            in  STD_LOGIC;
+        ram_write :            in  STD_LOGIC;
         ram_write_data :    in  STD_LOGIC_VECTOR (15 downto 0);
         ram_addr :          in  STD_LOGIC_VECTOR (15 downto 0);
         ram_read_data :     out  STD_LOGIC_VECTOR (15 downto 0);
@@ -61,14 +61,12 @@ Port(   rst:                in  STD_LOGIC;
         tsre:               in  STD_LOGIC;
         data_ready:         in  STD_LOGIC;
         rom_success:        out STD_LOGIC;
-
         load_finish:        out STD_LOGIC;
 		  dyp:					out STD_LOGIC_VECTOR(6 downto 0));
 end RomRam;
 
 architecture Behavioral of RomRam is
     signal clk_2,clk_4,clk_8:   STD_LOGIC;
-    signal ram_read, ram_write: STD_LOGIC;
     constant load_num : integer :=600;
     constant inst_num : integer :=1023;
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
@@ -623,8 +621,6 @@ begin
 	 dyp(4) <= data_ready;
 	 dyp(6) <= load_finish_temp;
     load_finish <= load_finish_temp;
-    ram_read <= not(ram_ce) and not(ram_we); -- =1 when ram_ce=RamEnable and ram_we=Read
-    ram_write <= not(ram_ce) and ram_we;		-- =1 when ram_ce=RamEnable and ram_we=Write
     get_clk_2:  process(clk)
                 begin
                     if (rising_edge(clk)) then
@@ -713,7 +709,7 @@ begin
 								serial_read <= '0';
 								serial_write <= '0';
                     else
-                        if (load_finish_temp = '0') then        --从flash里读取数据
+                        if (load_finish_temp = '0') then        --从flash里读取数�
                             Ram1EN <= RamEnable;
                             Ram1OE <= '1';
                             Ram1Addr <= "00" & now_addr;
@@ -725,7 +721,7 @@ begin
 									 serial_write <= '0';
                         else
                             if (ram_read = ReadEnable) then
-                                if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果，
+                                if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果�
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '1';
                                     Ram1Addr <= "00" & ram_addr;
@@ -794,7 +790,7 @@ begin
                     begin
                         if (rst = RstEnable or load_finish_temp = '0' or ram_write = '0') then
                             wrn <= '1';
-                        elsif (serial_write = '1') then     --单周期写串口（我只管写，什么时候收到我不管）
+                        elsif (serial_write = '1') then     --单周期写串口（我只管写，什么时候收到我不管�
                             wrn <= clk;
                         else 
                             wrn <= '1';
@@ -805,7 +801,7 @@ begin
                     begin
                         if (rst = RstEnable or load_finish_temp = '0' or ram_read = '0') then
                             rdn <= '1';
-                        elsif (serial_read = '1') then      --单周期读串口（因为只有在data_ready为1时才会读，所以可以省掉状态机，直接rdn一上一下，下去的时候就读出数据了）
+                        elsif (serial_read = '1') then      --单周期读串口（因为只有在data_ready�时才会读，所以可以省掉状态机，直接rdn一上一下，下去的时候就读出数据了）
                             rdn <= clk; 
                         else 
                             rdn <= '1';
