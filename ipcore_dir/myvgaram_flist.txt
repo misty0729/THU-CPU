@@ -1,0 +1,16 @@
+# Output products list for <myvgaram>
+_xmsgs/pn_parser.xmsgs
+myvgaram/blk_mem_gen_v7_3_readme.txt
+myvgaram/doc/blk_mem_gen_v7_3_vinfo.html
+myvgaram/doc/pg058-blk-mem-gen.pdf
+myvgaram.asy
+myvgaram.gise
+myvgaram.ngc
+myvgaram.sym
+myvgaram.vhd
+myvgaram.vho
+myvgaram.xco
+myvgaram.xise
+myvgaram_flist.txt
+myvgaram_xmdf.tcl
+summary.log
