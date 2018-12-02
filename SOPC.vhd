@@ -259,14 +259,14 @@ begin
 	 ram_fail <= '0';
 	 rom_fail <= not(rom_sucess);
 	 rst_for_cpu <= rst and load_finish;
-    CPU_component: CPU port map(clk=>clk_step, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
+    CPU_component: CPU port map(clk=>clk_4, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
                                 led=>fakefakeled, dyp0=>fakedyp, dyp1=>fakedyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
 	
 --  ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 
 --  RAM_component: RAM port map(clk=>clk, ce=>ram_ce, we=>ram_we, data_in=>ram_write_data_out, addr=>ram_addr, data_out=>ram_read_data_in);
-	 RomRam_component: RomRam port map(clk=>clk, rst=>rst, 
+	 RomRam_component: RomRam port map(clk=>clk_4, rst=>rst, 
 													rom_ce=>rom_ce, rom_addr=>rom_addr, rom_read_data=>rom_read_data_in,
 													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
