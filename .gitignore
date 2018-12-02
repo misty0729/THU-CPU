@@ -3,6 +3,7 @@
 !*.xise
 !/datapath/
 !/CPU/
+!/VGA/
 !.gitignore
 !*.vhd
 !*.ucf

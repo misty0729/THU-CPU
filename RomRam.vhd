@@ -74,14 +74,16 @@ Port(   rst:                in  STD_LOGIC;
 			  flash_data : inout STD_LOGIC_VECTOR(15 downto 0);
 			  
 		dyp:				out STD_LOGIC_VECTOR(6 downto 0);
-		led: 				out STD_LOGIC_VECTOR(15 downto 0));
+		led: 				out STD_LOGIC_VECTOR(15 downto 0);
+		  vga_addr:				in STD_LOGIC_VECTOR(15 downto 0);
+		  vga_data:				out STD_LOGIC_VECTOR(15 downto 0)
+		  );
 end RomRam;
 
 architecture Behavioral of RomRam is
     signal clk_2,clk_4,clk_8:   STD_LOGIC;
     signal ram_read, ram_write: STD_LOGIC;
-    constant load_num : integer :=600;
-    constant inst_num : integer :=1023;
+    constant load_num : integer :=20480;
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
     signal   load_finish_temp:   STD_LOGIC;
 	 signal   rom_success_temp: STD_LOGIC;
@@ -147,8 +149,9 @@ begin
     flash_io_component: flash_io PORT MAP(led=>led, addr=>now_addr, data_out=>flash_read_data, clk=>clk, reset=>rst_for_flash, flash_byte=>flash_byte, flash_vpen=>flash_vpen, flash_ce=>flash_ce, flash_oe=>flash_oe, flash_we=>flash_we, flash_rp=>flash_rp, flash_addr=>flash_addr, flash_data=>flash_data, dyp0=>dyp);
 
     Ram2EN <= RamEnable;
-				
-    rom_control:process(rst, rom_addr, rom_ce, now_addr, load_finish_temp, flash_read_data)
+	 vga_data <= Ram2Data;
+	
+    rom_control:process(rst, rom_addr, rom_ce, now_addr, load_finish_temp, flash_read_data, vga_addr)
                 begin
                     if (rst = RstEnable) then   --rst之后重新从头load程序
                         Ram2OE <= '1';
@@ -157,7 +160,7 @@ begin
                     else    
                         if (load_finish_temp = '1') then --load完成，那么可以读指令
                             Ram2OE <= '0';
-                            Ram2Addr <= "00" & rom_addr;
+                            Ram2Addr <= "00" & vga_addr;
                             Ram2Data <= ZzzzWord;
                         else										--否则继续load下一条指
                             Ram2OE <= '1';
@@ -175,6 +178,13 @@ begin
                             Ram2WE <= clk;  --写的时候让WE和clk同步，相当于clk=1时，准备数据，clk拉下去的时候WE同时拉下并写入数
                         end if;
                     end process;         
+						  
+	 --Ram2EN <= RamEnable;
+	 --Ram2OE <= '0';
+	 --Ram2WE <= '1';
+	 --Ram2Addr <= "00" & vga_addr;
+	 --vga_data <= Ram2Data;
+	 
 
     check_load_finish:	process(rst, now_addr)
 						begin
@@ -212,7 +222,7 @@ begin
 						serial_read <= '0';
 						serial_write <= '0';
                     else
-                        if (load_finish_temp = '0') then        --从flash里读取数据
+                        if (load_finish_temp = '0') then        --从flash里读取数
                             Ram1EN <= RamEnable;
                             Ram1OE <= '1';
                             Ram1Addr <= "00" & now_addr;
@@ -224,7 +234,7 @@ begin
 							serial_write <= '0';
                         else
                             if (ram_read = ReadEnable) then
-                                if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果，
+                                if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '1';
                                     Ram1Addr <= "00" & ram_addr;
@@ -293,7 +303,7 @@ begin
                     begin
                         if (rst = RstEnable or load_finish_temp = '0' or ram_write = '0') then
                             wrn <= '1';
-                        elsif (serial_write = '1') then     --单周期写串口（我只管写，什么时候收到我不管）
+                        elsif (serial_write = '1') then     --单周期写串口（我只管写，什么时候收到我不管
                             wrn <= clk;
                         else 
                             wrn <= '1';
@@ -304,7 +314,7 @@ begin
                     begin
                         if (rst = RstEnable or load_finish_temp = '0' or ram_read = '0') then
                             rdn <= '1';
-                        elsif (serial_read = '1') then      --单周期读串口（因为只有在data_ready为1时才会读，所以可以省掉状态机，直接rdn一上一下，下去的时候就读出数据了）
+                        elsif (serial_read = '1') then      --单周期读串口（因为只有在data_ready时才会读，所以可以省掉状态机，直接rdn一上一下，下去的时候就读出数据了）
                             rdn <= clk; 
                         else 
                             rdn <= '1';

@@ -56,7 +56,6 @@ entity SOPC is
 			  tbre:					 in		STD_LOGIC;
 			  tsre:					 in		STD_LOGIC;
 			  data_ready:			 in		STD_LOGIC;
-			  
 			  flash_byte : 		 out 		STD_LOGIC;--BYTE#
 			  flash_vpen : 		 out 		STD_LOGIC;
 			  flash_ce : 			 out 		STD_LOGIC;
@@ -66,7 +65,12 @@ entity SOPC is
 			  flash_addr : 		 out 		STD_LOGIC_VECTOR(22 downto 0);
 			  flash_data : 		 inout 	STD_LOGIC_VECTOR(15 downto 0);
 			  
-			  sw:						 in  		STD_LOGIC_VECTOR(15 downto 0));
+			  sw:						 in  		STD_LOGIC_VECTOR(15 downto 0);
+           Hs:						 out		STD_LOGIC;
+           Vs:						 out  	STD_LOGIC;
+			  R:                  out 		STD_LOGIC_VECTOR (2 downto 0);
+			  G:						 out		STD_LOGIC_VECTOR (2 downto 0);
+			  B:						 out		STD_LOGIC_VECTOR (2 downto 0));
 end SOPC;
 
 
@@ -101,6 +105,13 @@ signal ram_addr :  STD_LOGIC_VECTOR (15 downto 0);
 
 --RAM_PROVIDE
 signal ram_read_data_in: STD_LOGIC_VECTOR (15 downto 0);
+
+--VGA_NEED
+signal vga_ram_addr: STD_LOGIC_VECTOR (15 downto 0);
+signal vga_ram_data: STD_LOGIC_VECTOR (15 downto 0);
+signal vga_block_addr : STD_LOGIC_VECTOR (15 downto 0);
+signal vga_data_new : STD_LOGIC_VECTOR(15 downto 0);
+
 component CPU
     Port ( rst : in  STD_LOGIC;
            clk : in  STD_LOGIC;
@@ -176,19 +187,34 @@ Port(   rst:                in  STD_LOGIC;
 			  flash_data : inout STD_LOGIC_VECTOR(15 downto 0);
 			  
 		dyp:				out STD_LOGIC_VECTOR(6 downto 0);
-		led:				out STD_LOGIC_VECTOR(15 downto 0));
+		led:				out STD_LOGIC_VECTOR(15 downto 0);
+		vga_addr:				in STD_LOGIC_VECTOR(15 downto 0);
+		vga_data:				out STD_LOGIC_VECTOR(15 downto 0));
 end component;
 
-component CLOCK
-port(
-		clk_in:	in STD_LOGIC;
-		clk_step:in STD_LOGIC;
-		sw:		in STD_LOGIC_VECTOR(15 downto 0);
-		clk_out:	out STD_LOGIC);
+
+component VGA is
+    Port ( clk : in  STD_LOGIC;
+           rst : in  STD_LOGIC;
+           R : out  STD_LOGIC_VECTOR (2 downto 0);
+           G : out  STD_LOGIC_VECTOR (2 downto 0);
+           B : out  STD_LOGIC_VECTOR (2 downto 0);
+           Hs : out  STD_LOGIC;
+           Vs : out  STD_LOGIC;
+			  vga_block_addr : in STD_LOGIC_VECTOR (15 downto 0);
+			  vga_data_new : in STD_LOGIC_VECTOR(15 downto 0);
+			  ram_addr : out STD_LOGIC_VECTOR (15 downto 0);
+			  ram_data : in STD_LOGIC_VECTOR (15 downto 0);
+			  led:		out STD_LOGIC_VECTOR (15 downto 0);
+			  dyp0:     out STD_LOGIC_VECTOR (6 downto 0);
+			  dyp1:		out STD_LOGIC_VECTOR (6 downto 0));
 end component;
 
 signal clk_out : STD_LOGIC;
 signal fakeled: STD_LOGIC_VECTOR(15 downto 0);
+signal fakefakeled: STD_LOGIC_VECTOR(15 downto 0);
+signal fakedyp0: STD_LOGIC_VECTOR(6 downto 0);
+signal fakedyp1: STD_LOGIC_VECTOR(6 downto 0);
 begin
 	 get_clk_2:  process(clk)
                 begin
@@ -203,26 +229,27 @@ begin
                         clk_4 <= not(clk_4);
                     end if;
                 end process;
-					 
-	 CLOCK_component: CLOCK port map(clk_in=>clk, clk_step=>clk_step, sw=>sw, clk_out=>clk_out);
 
 	 ram_fail <= '0';
 	 rom_fail <= not(rom_sucess);
 	 rst_for_cpu <= rst and load_finish;
-    CPU_component: CPU port map(clk=>clk_2, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
+    CPU_component: CPU port map(clk=>clk_4, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
-                                led=>fakeled, dyp0=>fakedyp, dyp1=>dyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
+                                led=>fakeled, dyp0=>fakedyp, dyp1=>fakedyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
 	
 --  ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 
 --  RAM_component: RAM port map(clk=>clk, ce=>ram_ce, we=>ram_we, data_in=>ram_write_data_out, addr=>ram_addr, data_out=>ram_read_data_in);
-	 RomRam_component: RomRam port map(clk=>clk_2, rst=>rst, 
+	 RomRam_component: RomRam port map(clk=>clk_4, rst=>rst, 
 													rom_ce=>rom_ce, rom_addr=>rom_addr, rom_read_data=>rom_read_data_in,
 													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
 													Ram2EN=>Ram2EN, Ram2OE=>Ram2OE, Ram2WE=>Ram2WE, Ram2Addr=>Ram2Addr, Ram2Data=>Ram2Data,
 													flash_byte=>flash_byte, flash_vpen=>flash_vpen, flash_ce=>flash_ce, flash_oe=>flash_oe, flash_we=>flash_we, flash_rp=>flash_rp, flash_addr=>flash_addr, flash_data=>flash_data,
-													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess
-													,led=>led);
+													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>fakedyp0, rom_success=>rom_sucess
+													,led=>fakefakeled,
+													vga_addr => vga_ram_addr, vga_data => vga_ram_data);
+													
+	 VGA_component: VGA port map(clk => clk, rst => rst, R => R, G => G, B => B, Hs => Hs, Vs => Vs, vga_block_addr => vga_block_addr, vga_data_new => vga_data_new, ram_addr => vga_ram_addr, ram_data => vga_ram_data, led=>led, dyp0=>dyp0, dyp1=>dyp1);
 end Behavioral;
 
