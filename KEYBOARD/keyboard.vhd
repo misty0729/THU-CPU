@@ -79,6 +79,7 @@ begin
 					kb_oe <= '0';
 					if ps2_oe = '1' then
 						case ps2_byte is
+							--up down left right
 							when x"75" =>
 								ascii_buf <= x"0011";
 								cstate <= start;
@@ -90,10 +91,11 @@ begin
 								cstate <= start;
 							when x"74" =>
 								ascii_buf <= x"0014";
-								cstate <= start;
+								cstate <= start;-=
 							when x"f0" =>
 								cstate <= up;
 							when others =>
+								ascii_buf <= x"0000";
 								cstate <= start;
 						end case;
 					end if;
@@ -116,6 +118,21 @@ begin
 						prev_byte <= byte_buf;
 						case byte_buf is
 						
+							--enter
+							when x"5a" =>
+								ascii_buf <= x"000d";
+								cstate <= start;
+								
+							--bksp
+							when x"66" =>
+								ascii_buf <= x"0008";
+								cstate <= start;
+								
+							--esc
+							when x"76" =>
+								ascii_buf <= x"0010";
+								cstate <= start;
+								
 							-- a -> z
 							when x"1c" =>
 								if upper = '1' then
@@ -372,6 +389,37 @@ begin
 								end if;
 								cstate <= start;
 					
+							--*+-
+							when x"7c" =>
+								ascii_buf <= x"002a";
+								cstate <= start;
+							when x"79" =>
+								ascii_buf <= x"002b";
+								cstate <= start;
+							when x"7b" =>
+								ascii_buf <= x"002d";
+								cstate <= start;
+								
+							--'
+							when x"52" =>
+								ascii_buf <= x"0027";
+								cstate <= start;
+							
+							--,
+							when x"41" =>
+								ascii_buf <= x"002c";
+								cstate <= start;
+								
+							--.
+							when x"49" =>
+								ascii_buf <= x"002e";
+								cstate <= start;
+								
+							--/
+							when x"4a" =>
+								ascii_buf <= x"002f";
+								cstate <= start;
+								
 							when others =>
 								ascii_buf <= x"0000";
 								cstate <= start;
