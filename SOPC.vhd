@@ -70,7 +70,10 @@ entity SOPC is
            Vs:						 out  	STD_LOGIC;
 			  R:                  out 		STD_LOGIC_VECTOR (2 downto 0);
 			  G:						 out		STD_LOGIC_VECTOR (2 downto 0);
-			  B:						 out		STD_LOGIC_VECTOR (2 downto 0));
+			  B:						 out		STD_LOGIC_VECTOR (2 downto 0);
+			  
+			  ps2clk :				 in  STD_LOGIC;
+           ps2data :				 in  STD_LOGIC);
 end SOPC;
 
 
@@ -115,6 +118,11 @@ signal vga_read_data: STD_LOGIC_VECTOR(6 downto 0);
 signal vga_pixel_addr: STD_LOGIC_VECTOR(15 downto 0);
 signal vga_pixel_data: STD_LOGIC_VECTOR(15 downto 0);
 
+--KEYBOARD_NEED
+signal byte_tmp : STD_LOGIC_VECTOR (7 downto 0);
+signal oe_tmp : STD_LOGIC;
+signal oe_out : STD_LOGIC;
+	
 component CPU
     Port ( rst : in  STD_LOGIC;
            clk : in  STD_LOGIC;
@@ -200,6 +208,23 @@ Port(   rst:                in  STD_LOGIC;
 		  );
 end component;
 
+component ps2 is
+		Port ( clk_cpu : in  STD_LOGIC;
+				rst_cpu : in  STD_LOGIC;
+				ps2clk : in  STD_LOGIC;
+				ps2data : in  STD_LOGIC;
+				byte : out  STD_LOGIC_VECTOR (7 downto 0);
+				OE : out STD_LOGIC);
+	end component;
+	
+component keyboard is
+		Port ( clk_cpu : in  STD_LOGIC;
+				rst_cpu : in  STD_LOGIC;
+				ps2_byte : in  STD_LOGIC_VECTOR (7 downto 0);
+				ps2_oe : in  STD_LOGIC;
+				ascii : out  STD_LOGIC_VECTOR (15 downto 0);
+				kb_oe : out  STD_LOGIC);
+end component;
 
 component VGA
 	 Port ( clk : in  STD_LOGIC;
@@ -239,6 +264,7 @@ END COMPONENT;
 signal clk_out : STD_LOGIC;
 signal fakeled: STD_LOGIC_VECTOR(15 downto 0);
 signal fakefakeled: STD_LOGIC_VECTOR(15 downto 0);
+signal fakefakefakeled: STD_LOGIC_VECTOR(15 downto 0);
 signal fakedyp0: STD_LOGIC_VECTOR(6 downto 0);
 signal fakedyp1: STD_LOGIC_VECTOR(6 downto 0);
 begin
@@ -275,7 +301,8 @@ begin
 													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess
 													,led=>fakeled,
 													vga_pixel_addr => vga_pixel_addr, vga_pixel_data => vga_pixel_data, vga_write_enable=>vga_write_enable, sw=>sw, vga_write_addr=>vga_write_addr, vga_write_data=>vga_write_data);
-													
+	 ps2_cpn : ps2 port map(clk_cpu => clk, rst_cpu => rst, ps2clk => ps2clk, ps2data => ps2data, byte => byte_tmp, OE => oe_tmp);
+	 kb : keyboard port map(clk_cpu => clk, rst_cpu => rst, ps2_byte => byte_tmp, ps2_oe => oe_tmp, ascii => led, kb_oe => oe_out);												
 	 VGA_component: VGA port map(clk => clk, rst => rst, R => R, G => G, B => B, Hs => Hs, Vs => Vs, vga_pixel_addr => vga_pixel_addr,  vga_pixel_data=>vga_pixel_data, vga_read_addr=>vga_read_addr, vga_read_data=>vga_read_data, led=>led, dyp0=>fakedyp0, dyp1=>dyp1);
 
 	  
