@@ -61,12 +61,12 @@ begin
 --	led(5 downto 4) <= regist(2)(1 downto 0);
 --	led(3 downto 2) <= regist(1)(1 downto 0);
 --	led(1 downto 0) <= regist(0)(1 downto 0);
---	led(15 downto 12) <= regist(4)(3 downto 0);
---	led(11 downto 8) <= regist(3)(15 downto 12);
---	led(7 downto 4) <= regist(2)(3 downto 0);
---	led(3 downto 0) <= regist(1)(3 downto 0);
+	led(15 downto 12) <= regist(4)(3 downto 0);
+	led(11 downto 8) <= regist(3)(15 downto 12);
+	led(7 downto 4) <= regist(2)(3 downto 0);
+	led(3 downto 0) <= regist(1)(3 downto 0);
 	
-	led(15 downto 0) <= regist(0);
+--	led(15 downto 0) <= regist(0);
 	Write1:	process(clk)
 				begin
 					if (rising_edge(clk)) then

@@ -150,7 +150,7 @@ begin
                                 if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '1';
-												--Ram1Data <= "00000000000000" & (data_ready) & (tbre and tsre);
+												--Ram1Data <= "00000000000000" & data_ready & (tbre and tsre);
                                     if (tbre = '1' and tsre = '1' and data_ready = '1') then
                                         Ram1Data <= x"0003";
                                     elsif (tbre = '1' and tsre = '1') then
