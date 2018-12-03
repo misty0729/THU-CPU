@@ -38,31 +38,18 @@ entity PC is
            stall : in  STD_LOGIC_VECTOR(5 downto 0);
            clk : in  STD_LOGIC;
            rst : in  STD_LOGIC;
-           pc : out  STD_LOGIC_VECTOR (15 downto 0);
-			  ce : out  STD_LOGIC);
+           pc : out  STD_LOGIC_VECTOR (15 downto 0));
 end PC;
 
 architecture Behavioral of PC is
 	signal pc_tmp: STD_LOGIC_VECTOR (15 downto 0) := ZeroWord;
-	signal ce_tmp: STD_LOGIC;
 begin
 	pc <= pc_tmp;
-	ce <= ce_tmp;
-	get_ce: process(clk)
-				begin
-					if (rising_edge(clk)) then
-						if (rst = RstEnable) then
-							ce_tmp <= RamDisable;
-						else
-							ce_tmp <= RamEnable;
-						end if;
-					end if;
-				end process;
 				
-	arr: process(clk)
+	main: process(rst, clk)
 	begin
 		if rising_edge(clk) then
-			if ce_tmp = RamDisable then
+			if rst = RstEnable then
 				pc_tmp <= ZeroWord;
 			elsif stall(0) = NoStop then
 				if branch_flag_in = Branch then

@@ -35,20 +35,22 @@ use WORK.DEFINES.ALL;
 entity CPU is
     Port ( rst : in  STD_LOGIC;
            clk : in  STD_LOGIC;
-           rom_read_data_in : in  STD_LOGIC_VECTOR (15 downto 0);
-           ram_read_data_in : in  STD_LOGIC_VECTOR (15 downto 0);
-           rom_ce : out  STD_LOGIC;
-           rom_addr : out  STD_LOGIC_VECTOR (15 downto 0);
-			  ram_ce : out STD_LOGIC;
-           ram_read : out  STD_LOGIC;
-           ram_write : out  STD_LOGIC;
-           ram_write_data_out : out  STD_LOGIC_VECTOR (15 downto 0);
-           ram_addr : out  STD_LOGIC_VECTOR (15 downto 0);
+			  
+			  tbre: in  STD_LOGIC;
+			  tsre: in  STD_LOGIC;
+			  data_ready: in STD_LOGIC;
+			  wrn:	out STD_LOGIC;
+			  rdn: 	out STD_LOGIC;
+			  
+			  Ram1EN:	out STD_LOGIC;
+			  Ram1OE:   out STD_LOGIC;
+			  Ram1WE:	out STD_LOGIC;
+			  Ram1Addr: out STD_LOGIC_VECTOR(17 downto 0);
+			  Ram1Data: inout STD_LOGIC_VECTOR(15 downto 0);
+			  
            led : out STD_LOGIC_VECTOR (15 downto 0);
 			  dyp1: out STD_LOGIC_VECTOR (6 downto 0);
-			  dyp0: out STD_LOGIC_VECTOR (6 downto 0);
-			  stallreq_from_if: in STD_LOGIC;
-			  stallreq_from_mem: in STD_LOGIC);
+			  dyp0: out STD_LOGIC_VECTOR (6 downto 0));
 end CPU;
 
 architecture Behavioral of CPU is
@@ -59,11 +61,13 @@ signal fakeled2: STD_LOGIC_VECTOR(15 downto 0);
 
 
 --CTRL_NEED
-
+signal stallreq_from_if: STD_LOGIC;
+signal stallreq_from_mem: STD_LOGIC;
 --CTRL_PROVIDE
 signal stall: STD_LOGIC_VECTOR(5 downto 0);
 --IF_NEED
-
+signal rom_data: STD_LOGIC_VECTOR(15 downto 0);
+signal rom_addr: STD_LOGIC_VECTOR(15 downto 0);
 
 --IF_PROVIDE
 signal pc_tmp : STD_LOGIC_VECTOR(15 downto 0);
@@ -136,8 +140,7 @@ component PC
            stall :                  in  STD_LOGIC_VECTOR(5 downto 0);
            clk :                    in  STD_LOGIC;
            rst :                    in  STD_LOGIC;
-           pc :                     out STD_LOGIC_VECTOR (15 downto 0);
-		   ce:                      out STD_LOGIC);
+           pc :                     out STD_LOGIC_VECTOR (15 downto 0));
 end component;
 
 component IF_ID 
@@ -252,21 +255,28 @@ component MEM
 		mem_addr_in : in STD_LOGIC_VECTOR(15 downto 0);
 		--写入内存的数
 		mem_write_data_in : in STD_LOGIC_VECTOR(15 downto 0);
-		mem_read_data_in : in STD_LOGIC_VECTOR(15 downto 0);
 		rst : in STD_LOGIC;
-
+		clk : in STD_LOGIC;
 		reg_write_out : out STD_LOGIC;
 		reg_addr_out : out STD_LOGIC_VECTOR(3 downto 0);
 		reg_data_out : out STD_LOGIC_VECTOR(15 downto 0);
-
-		--写内存地址
-		mem_addr_out : out STD_LOGIC_VECTOR(15 downto 0);
-		--写入内存的数
-		mem_data_out : out STD_LOGIC_VECTOR(15 downto 0);
-		--操作ram1读写的两个使能端
-		mem_read_out : out STD_LOGIC;
-		mem_write_out : out STD_LOGIC;
-		mem_ce_out: out STD_LOGIC);
+        
+        -- 串口信息
+		  wrn:	 out STD_LOGIC;
+		  rdn: 	 out STD_LOGIC;
+        tbre:   in STD_LOGIC;
+        tsre:   in STD_LOGIC;
+        data_ready: in STD_LOGIC;
+		  Ram1EN:  out STD_LOGIC;
+		  Ram1OE:  out STD_LOGIC;
+		  Ram1WE:  out STD_LOGIC;
+		  Ram1Addr: out STD_LOGIC_VECTOR(17 downto 0);
+		  Ram1Data:	inout STD_LOGIC_VECTOR(15 downto 0);
+        
+        -- 取指令信息
+        rom_addr: in STD_LOGIC_VECTOR(15 downto 0);
+        rom_data: out STD_LOGIC_VECTOR(15 downto 0);
+        stallreq_from_if: out STD_LOGIC);
 end component;
 
 component MEM_WB
@@ -310,10 +320,15 @@ end component;
 begin
 	 rom_addr<=pc_tmp;
 
-	
-    PC_component: PC port map(rst=>rst, clk=>clk, stall=>stall, branch_flag_in=>id_branch_flag_out,branch_target_addr_in=>id_branch_target_addr_out,pc=>pc_tmp,ce=>rom_ce);
+    PC_component: PC port map(
+	 rst=>rst, 
+	 clk=>clk, 
+	 stall=>stall, 
+	 branch_flag_in=>id_branch_flag_out,
+	 branch_target_addr_in=>id_branch_target_addr_out,
+	 pc=>pc_tmp);
 
-    IF_ID_component: IF_ID port map(rst=>rst, clk=>clk, stall=>stall, if_pc=>pc_tmp, if_inst=>rom_read_data_in, id_pc=>id_pc_in, id_inst=>id_inst_in, dyp1=>dyp1);
+    IF_ID_component: IF_ID port map(rst=>rst, clk=>clk, stall=>stall, if_pc=>pc_tmp, if_inst=>rom_data, id_pc=>id_pc_in, id_inst=>id_inst_in, dyp1=>dyp1);
     
     ID_component: ID port map(rst=>rst, pc_in=>id_pc_in, inst_in=>id_inst_in, reg1_data_in=>id_reg1_data_in, reg2_data_in=>id_reg2_data_in, 
                             ex_op_type_in=>ex_op_type_out, ex_reg_write_in=>ex_reg_write_out, ex_reg_addr_in=>ex_reg_addr_out, ex_reg_data_in=>ex_reg_data_out,
@@ -322,7 +337,7 @@ begin
                             reg_write_out=>id_reg_write_out, reg_addr_out=>id_reg_addr_out, 
                             mem_write_data_out=>id_mem_write_data_out, branch_flag_out=>id_branch_flag_out, branch_target_addr_out=>id_branch_target_addr_out,
                             reg1_read_out=>id_reg1_read_out, reg1_addr_out=>id_reg1_addr_out, reg2_read_out=>id_reg2_read_out,reg2_addr_out=>id_reg2_addr_out,
-                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>fakeled2);
+                            stallreq_out=>id_stallreq_out, dyp0=>dyp0, led=>led);
 
     ID_EX_component: ID_EX port map(rst=>rst, clk=>clk, id_op=>id_op_out, id_op_type=>id_op_type_out, id_reg1_data=>id_reg1_data_out,id_reg2_data=>id_reg2_data_out,
                                     id_reg_write=>id_reg_write_out, id_reg_addr=>id_reg_addr_out, id_mem_write_data=>id_mem_write_data_out,
@@ -342,12 +357,31 @@ begin
                                       mem_mem_addr=>mem_mem_addr_in, mem_mem_write_data=>mem_mem_write_data_in,
 												  stall=>stall);
 
-    MEM_component: MEM port map(rst=>rst, op_type_in=>mem_op_type_in,reg_write_in=>mem_reg_write_in, reg_addr_in=>mem_reg_addr_in, reg_data_in=>mem_reg_data_in, mem_addr_in=>mem_mem_addr_in,
-                                mem_write_data_in=>mem_mem_write_data_in,reg_write_out=>mem_reg_write_out, reg_addr_out=>mem_reg_addr_out,
-                                reg_data_out=>mem_reg_data_out, mem_addr_out=>ram_addr, mem_data_out=>ram_write_data_out, mem_read_out=>ram_read, mem_write_out=>ram_write,
-										  mem_read_data_in=>ram_read_data_in, mem_ce_out=>ram_ce);
-
-    
+    MEM_component: MEM port map(
+	 rst=>rst, 
+	 clk=>clk,
+	 op_type_in=>mem_op_type_in,
+	 reg_write_in=>mem_reg_write_in, 
+	 reg_addr_in=>mem_reg_addr_in, 
+	 reg_data_in=>mem_reg_data_in, 
+	 mem_addr_in=>mem_mem_addr_in,
+    mem_write_data_in=>mem_mem_write_data_in,
+	 reg_write_out=>mem_reg_write_out, 
+	 reg_addr_out=>mem_reg_addr_out,
+    reg_data_out=>mem_reg_data_out,
+	 tbre=>tbre,
+	 tsre=>tsre,
+	 data_ready=>data_ready,
+	 Ram1EN=>Ram1EN,
+	 Ram1OE=>Ram1OE,
+	 Ram1WE=>Ram1WE,
+	 Ram1Addr=>Ram1Addr,
+	 Ram1Data=>Ram1Data,
+	 rom_data=>rom_data,
+	 stallreq_from_if=>stallreq_from_if,
+	 rom_addr=>rom_addr,
+	 wrn=>wrn,
+	 rdn=>rdn);
     
     MEM_WB_component: MEM_WB port map(rst=>rst, clk=>clk, stall=>stall, 
 												  mem_reg_write=>mem_reg_write_out, mem_reg_addr=>mem_reg_addr_out, mem_reg_data=>mem_reg_data_out,
@@ -355,8 +389,8 @@ begin
 
     REG_component: REG port map(rst=>rst, clk=>clk, re1=>id_reg1_read_out, raddr1=>id_reg1_addr_out, re2=>id_reg2_read_out, raddr2=>id_reg2_addr_out,
                                 we=>wb_reg_write_in, waddr=>wb_reg_addr_in, wdata=>wb_reg_data_in, rdata1=>id_reg1_data_in, rdata2=>id_reg2_data_in
-										  ,led=>led);
-
+										  ,led=>fakeled2);
+	 stallreq_from_mem <= NoStop;
     CTRL_component: CTRL port map(rst=>rst, stallreq_from_id=>id_stallreq_out, stallreq_from_if=>stallreq_from_if,stallreq_from_mem=>stallreq_from_mem, stall=>stall);
 end Behavioral;
 
