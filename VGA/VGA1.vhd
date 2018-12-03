@@ -42,7 +42,7 @@ entity VGA is
            Vs : out  STD_LOGIC;
 			  vga_pixel_addr : out STD_LOGIC_VECTOR (15 downto 0); -- in ram2, single pix
 			  vga_pixel_data : in  STD_LOGIC_VECTOR (15 downto 0); -- in ram2, single pix
-			  vga_read_data:	 in  STD_LOGIC_VECTOR (6 downto 0);  -- in vgaram, single block
+			  vga_read_data:	 in  STD_LOGIC_VECTOR (7 downto 0);  -- in vgaram, single block
 			  vga_read_addr:	 out STD_LOGIC_VECTOR (11 downto 0); -- in vgaram, block start
 			  led:		 out STD_LOGIC_VECTOR (15 downto 0);
 			  dyp0: out STD_LOGIC_VECTOR(6 downto 0);
@@ -68,7 +68,7 @@ begin
 	block_j <= j / 8;
 	offset_j <= j mod 8;
    vga_read_addr <= conv_std_logic_vector(block_i * 80 + block_j, 12);
-	vga_pixel_addr_temp <= start_addr + conv_integer("000000000" & vga_read_data) * block_size + offset_i * 8 + offset_j;
+	vga_pixel_addr_temp <= start_addr + conv_integer("00000000" & vga_read_data) * block_size + offset_i * 8 + offset_j;
 	--led(15 downto 8) <= vga_pixel_addr_temp(7 downto 0);
 	--led(7 downto 0) <= vga_pixel_data(7 downto 0);
 	led <= vga_pixel_addr_temp;

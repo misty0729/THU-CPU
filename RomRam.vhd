@@ -79,7 +79,7 @@ Port(   rst:                in  STD_LOGIC;
 		  vga_pixel_data:				out STD_LOGIC_VECTOR(15 downto 0);
 		  vga_write_enable: 			out STD_LOGIC_VECTOR(0 downto 0);
 		  vga_write_addr: 			out STD_LOGIC_VECTOR(11 downto 0);
-		  vga_write_data: 			out STD_LOGIC_VECTOR(6 downto 0);
+		  vga_write_data: 			out STD_LOGIC_VECTOR(7 downto 0);
 		  kb_oe:							in STD_LOGIC;
 		  kb_ascii:						in STD_LOGIC_VECTOR(15 downto 0);
 		  sw: in STD_LOGIC_VECTOR(15 downto 0)
@@ -89,7 +89,7 @@ end RomRam;
 architecture Behavioral of RomRam is
     signal clk_2,clk_4,clk_8:   STD_LOGIC;
     signal ram_read, ram_write: STD_LOGIC;
-    constant load_num : integer :=20480;
+    constant load_num : integer :=40960;
     signal   now_addr  : STD_LOGIC_VECTOR(15 downto 0);
     signal   load_finish_temp:   STD_LOGIC;
 	 signal   rom_success_temp: STD_LOGIC;
@@ -311,7 +311,7 @@ begin
 												Ram1EN <= RamDisable;
 												Ram1OE <= '1';
 												Ram1Addr <= "00" & ZeroWord;
-												vga_write_data <= ram_write_data(6 downto 0); 
+												vga_write_data <= ram_write_data(7 downto 0); 
 												serial_read <= '0';
                                     serial_write<= '0';
                                 else                             --正常写入数据

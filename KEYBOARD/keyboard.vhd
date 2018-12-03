@@ -92,6 +92,9 @@ begin
 							when x"74" =>
 								ascii_buf <= x"0014";
 								cstate <= start;
+							when x"71"=> -- delete
+								ascii_buf <= x"0009";
+								cstate <= start;
 							when x"f0" =>
 								cstate <= up;
 							when others =>

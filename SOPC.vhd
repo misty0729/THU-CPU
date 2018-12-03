@@ -116,9 +116,9 @@ signal ram_read_data_in: STD_LOGIC_VECTOR (15 downto 0);
 --VGA_NEED
 signal vga_write_enable: STD_LOGIC_VECTOR(0 downto 0);
 signal vga_write_addr: STD_LOGIC_VECTOR(11 downto 0);
-signal vga_write_data: STD_LOGIC_VECTOR(6 downto 0);
+signal vga_write_data: STD_LOGIC_VECTOR(7 downto 0);
 signal vga_read_addr: STD_LOGIC_VECTOR(11 downto 0);
-signal vga_read_data: STD_LOGIC_VECTOR(6 downto 0);
+signal vga_read_data: STD_LOGIC_VECTOR(7 downto 0);
 signal vga_pixel_addr: STD_LOGIC_VECTOR(15 downto 0);
 signal vga_pixel_data: STD_LOGIC_VECTOR(15 downto 0);
 
@@ -208,7 +208,7 @@ Port(   rst:                in  STD_LOGIC;
 		  vga_pixel_data:				out STD_LOGIC_VECTOR(15 downto 0);
 		  vga_write_enable: 			out STD_LOGIC_VECTOR(0 downto 0);
 		  vga_write_addr: 			out STD_LOGIC_VECTOR(11 downto 0);
-		  vga_write_data: 			out STD_LOGIC_VECTOR(6 downto 0);
+		  vga_write_data: 			out STD_LOGIC_VECTOR(7 downto 0);
 		  kb_oe:							in STD_LOGIC;
 		  kb_ascii:						in STD_LOGIC_VECTOR(15 downto 0);
 		  sw: in STD_LOGIC_VECTOR(15 downto 0)
@@ -243,7 +243,7 @@ component VGA
            Vs : out  STD_LOGIC;
 			  vga_pixel_addr : out STD_LOGIC_VECTOR (15 downto 0);
 			  vga_pixel_data : in  STD_LOGIC_VECTOR (15 downto 0);
-			  vga_read_data:	 in  STD_LOGIC_VECTOR (6 downto 0); 
+			  vga_read_data:	 in  STD_LOGIC_VECTOR (7 downto 0); 
 			  vga_read_addr:	 out STD_LOGIC_VECTOR (11 downto 0);
 			  led:		 out STD_LOGIC_VECTOR (15 downto 0);
 			  dyp0: out STD_LOGIC_VECTOR(6 downto 0);
@@ -255,10 +255,10 @@ COMPONENT myvgaram
     clka : IN STD_LOGIC;
     wea : IN STD_LOGIC_VECTOR(0 DOWNTO 0);
     addra : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-    dina : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
+    dina : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
     clkb : IN STD_LOGIC;
     addrb : IN STD_LOGIC_VECTOR(11 DOWNTO 0);
-    doutb : OUT STD_LOGIC_VECTOR(6 DOWNTO 0)
+    doutb : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
   );
 END COMPONENT;
 
