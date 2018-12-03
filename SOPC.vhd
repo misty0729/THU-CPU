@@ -121,7 +121,8 @@ signal vga_pixel_data: STD_LOGIC_VECTOR(15 downto 0);
 --KEYBOARD_NEED
 signal byte_tmp : STD_LOGIC_VECTOR (7 downto 0);
 signal oe_tmp : STD_LOGIC;
-signal oe_out : STD_LOGIC;
+signal kb_oe : STD_LOGIC;
+signal ascii_tmp : STD_LOGIC_VECTOR (15 downto 0);
 	
 component CPU
     Port ( rst : in  STD_LOGIC;
@@ -204,6 +205,8 @@ Port(   rst:                in  STD_LOGIC;
 		  vga_write_enable: 			out STD_LOGIC_VECTOR(0 downto 0);
 		  vga_write_addr: 			out STD_LOGIC_VECTOR(11 downto 0);
 		  vga_write_data: 			out STD_LOGIC_VECTOR(6 downto 0);
+		  kb_oe:							in STD_LOGIC;
+		  kb_ascii:						in STD_LOGIC_VECTOR(15 downto 0);
 		  sw: in STD_LOGIC_VECTOR(15 downto 0)
 		  );
 end component;
@@ -300,9 +303,9 @@ begin
 													flash_byte=>flash_byte, flash_vpen=>flash_vpen, flash_ce=>flash_ce, flash_oe=>flash_oe, flash_we=>flash_we, flash_rp=>flash_rp, flash_addr=>flash_addr, flash_data=>flash_data,
 													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess
 													,led=>fakeled,
-													vga_pixel_addr => vga_pixel_addr, vga_pixel_data => vga_pixel_data, vga_write_enable=>vga_write_enable, sw=>sw, vga_write_addr=>vga_write_addr, vga_write_data=>vga_write_data);
+													vga_pixel_addr => vga_pixel_addr, vga_pixel_data => vga_pixel_data, vga_write_enable=>vga_write_enable, sw=>sw, vga_write_addr=>vga_write_addr, vga_write_data=>vga_write_data, kb_oe => kb_oe, kb_ascii => ascii_tmp);
 	 ps2_cpn : ps2 port map(clk_cpu => clk, rst_cpu => rst, ps2clk => ps2clk, ps2data => ps2data, byte => byte_tmp, OE => oe_tmp);
-	 kb : keyboard port map(clk_cpu => clk, rst_cpu => rst, ps2_byte => byte_tmp, ps2_oe => oe_tmp, ascii => led, kb_oe => oe_out);												
+	 kb : keyboard port map(clk_cpu => clk, rst_cpu => rst, ps2_byte => byte_tmp, ps2_oe => oe_tmp, ascii => ascii_tmp, kb_oe => kb_oe);												
 	 VGA_component: VGA port map(clk => clk, rst => rst, R => R, G => G, B => B, Hs => Hs, Vs => Vs, vga_pixel_addr => vga_pixel_addr,  vga_pixel_data=>vga_pixel_data, vga_read_addr=>vga_read_addr, vga_read_data=>vga_read_data, led=>led, dyp0=>fakedyp0, dyp1=>dyp1);
 
 	  

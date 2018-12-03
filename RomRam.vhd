@@ -80,6 +80,8 @@ Port(   rst:                in  STD_LOGIC;
 		  vga_write_enable: 			out STD_LOGIC_VECTOR(0 downto 0);
 		  vga_write_addr: 			out STD_LOGIC_VECTOR(11 downto 0);
 		  vga_write_data: 			out STD_LOGIC_VECTOR(6 downto 0);
+		  kb_oe:							in STD_LOGIC;
+		  kb_ascii:						in STD_LOGIC_VECTOR(15 downto 0);
 		  sw: in STD_LOGIC_VECTOR(15 downto 0)
 		  );
 end RomRam;
@@ -237,22 +239,22 @@ begin
                         Ram1OE <= '1';
                         Ram1Addr <= "00" & ZeroWord;
                         Ram1Data <= ZzzzWord;
-						now_addr <= ZeroWord;
-						serial_read <= '0';
-						serial_write <= '0';
+								now_addr <= ZeroWord;
+								serial_read <= '0';
+								serial_write <= '0';
                     else
                         if (load_finish_temp = '0') then        --从flash里读取数
                             Ram1EN <= RamEnable;
                             Ram1OE <= '1';
                             Ram1Addr <= "00" & now_addr;
                             Ram1Data <= flash_read_data;
-							if (rising_edge(clk_8)) then
-								now_addr <= now_addr + 1;
-							end if;
-							serial_read <= '0';
-							serial_write <= '0';
-                        else
-                            if (ram_read = ReadEnable) then
+									 if (rising_edge(clk_8)) then
+										now_addr <= now_addr + 1;
+									 end if;
+									 serial_read <= '0';
+									 serial_write <= '0';
+									 else
+										if (ram_read = ReadEnable) then
                                 if (ram_addr = x"bf01") then    --读取串口状态，此时不进行访存操作，直接返回结果
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '1';
@@ -275,6 +277,13 @@ begin
                                     Ram1Data <= ZzzzWord;
                                     serial_read <= '1';
                                     serial_write<= '0';
+										  elsif (ram_addr = x"bf06") then
+												Ram1EN <= RamDisable;
+												Ram1OE <= '1';
+												Ram1Addr <= "00" & ZeroWord;
+												Ram1Data <= kb_ascii;
+												serial_read <= '0';
+												serial_write <= '0';
                                 else                            --正常读取数据
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '0';
@@ -283,7 +292,7 @@ begin
                                     serial_read <= '0';
                                     serial_write<= '0';
                                 end if;        
-                            elsif (ram_write = WriteEnable) then --写入串口数据
+                              elsif (ram_write = WriteEnable) then --写入串口数据
                                 if (ram_addr = x"bf00") then     
                                     Ram1EN <= RamDisable;
                                     Ram1OE <= '1';
@@ -304,7 +313,7 @@ begin
 												Ram1Addr <= "00" & ZeroWord;
 												vga_write_data <= ram_write_data(6 downto 0); 
 												serial_read <= '0';
-                                    serial_write<= '0'; 
+                                    serial_write<= '0';
                                 else                             --正常写入数据
                                     Ram1EN <= RamEnable;
                                     Ram1OE <= '1';
@@ -313,21 +322,21 @@ begin
                                     serial_read <= '0';
                                     serial_write<= '0'; 
                                 end if;         
-                            elsif (rom_ce = RamEnable) then                             
+                              elsif (rom_ce = RamEnable) then                             
                                 Ram1EN <= RamEnable;
                                 Ram1OE <= '0';
                                 Ram1Addr <= "00" & rom_addr;
                                 Ram1Data <= ZzzzWord;
                                 serial_read <= '0';
                                 serial_write<= '0';
-                            else
+                              else
                                 Ram1EN <= RamDisable;
                                 Ram1OE <= '0';
                                 Ram1Addr <= "00" & ZeroWord;
                                 Ram1Data <= ZzzzWord;
                                 serial_read <= '0';
                                 serial_write <= '0';
-                            end if;       
+                              end if;       
                         end if;
                     end if;
                 end process;

@@ -91,7 +91,7 @@ begin
 								cstate <= start;
 							when x"74" =>
 								ascii_buf <= x"0014";
-								cstate <= start;-=
+								cstate <= start;
 							when x"f0" =>
 								cstate <= up;
 							when others =>
