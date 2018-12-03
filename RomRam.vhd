@@ -121,7 +121,7 @@ signal fakedyp: STD_LOGIC_VECTOR(6 downto 0);
 begin
 	 vga_write_enable_control: process(ram_addr, ram_write)
 									begin
-											if (ram_addr = x"bf03" and ram_write = WriteEnable) then
+											if (ram_addr = x"bf05" and ram_write = WriteEnable) then
 												vga_write_enable <= "1";
 											else
 												vga_write_enable <= "0";
@@ -291,14 +291,14 @@ begin
                                     Ram1Data <= ram_write_data;
                                     serial_read <= '0';
                                     serial_write<= '1';
-										  elsif (ram_addr = x"bf02") then  -- write vga_addr
+										  elsif (ram_addr = x"bf04") then  -- write vga_addr
 											   Ram1EN <= RamDisable;
 												Ram1OE <= '1';
 												Ram1Addr <= "00" & ZeroWord;
 												vga_write_addr_temp <= ram_write_data; 
 												serial_read <= '0';
                                     serial_write<= '0'; 
-										  elsif (ram_addr = x"bf03") then
+										  elsif (ram_addr = x"bf05") then
 												Ram1EN <= RamDisable;
 												Ram1OE <= '1';
 												Ram1Addr <= "00" & ZeroWord;

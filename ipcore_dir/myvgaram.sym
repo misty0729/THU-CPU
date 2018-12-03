@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <symbol version="7" name="myvgaram">
     <symboltype>BLOCK</symboltype>
-    <timestamp>2018-12-2T12:45:3</timestamp>
+    <timestamp>2018-12-3T0:30:40</timestamp>
     <pin polarity="Input" x="0" y="80" name="addra[11:0]" />
     <pin polarity="Input" x="0" y="112" name="dina[6:0]" />
     <pin polarity="Input" x="0" y="208" name="wea[0:0]" />

@@ -125,7 +125,7 @@ END COMPONENT;
       c_web_width => 1,
       c_write_depth_a => 4096,
       c_write_depth_b => 4096,
-      c_write_mode_a => "READ_FIRST",
+      c_write_mode_a => "WRITE_FIRST",
       c_write_mode_b => "NO_CHANGE",
       c_write_width_a => 7,
       c_write_width_b => 7,
