@@ -62,12 +62,6 @@ SW R5 R1 5
 SW R5 R2 4
 B GETCURRENTKEY                 
 NOP
-//JUDGECLEARSCREEN: LI R5 d      
-//SUBU R5 R1 R5
-//BNEZ R5 JUDGEEXIT               
-//NOP
-//B INIT                          
-//NOP
 JUDGEEXIT: LI R5 10             
 SUBU R5 R1 R5
 BNEZ R5 JUDGEENTER              
