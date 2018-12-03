@@ -67,7 +67,7 @@ begin
    DCM_SP_INST : DCM_SP
    generic map( CLK_FEEDBACK => "1X",
             CLKDV_DIVIDE => 1.5,
-            CLKFX_DIVIDE => 1,
+            CLKFX_DIVIDE => 5,
             CLKFX_MULTIPLY => 4,
             CLKIN_DIVIDE_BY_2 => FALSE,
             CLKIN_PERIOD => 20.000,

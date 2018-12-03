@@ -132,7 +132,7 @@ begin
     ram_control:process(rst, clk_8, ram_read, ram_write, ram_addr, ram_write_data, tbre, tsre, data_ready, rom_addr, rom_ce,  now_addr)
                 begin
                     if (rst = RstEnable) then
-                        Ram1EN <= RamEnable;
+                        Ram1EN <= RamDisable;
                         Ram1OE <= '1';
                         Ram1Addr <= "00" & ZeroWord;
                         Ram1Data <= ZzzzWord;
