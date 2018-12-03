@@ -43,12 +43,14 @@ architecture Behavioral of keyboard is
 	type state is(start, down_e, up, done);
 	signal byte_buf, prev_byte : STD_LOGIC_VECTOR (7 downto 0);
 	signal ascii_buf : STD_LOGIC_VECTOR (15 downto 0);
-	signal shift,Lshift,Rshift,caps,upper: STD_LOGIC;
+	signal shift,Lshift,Rshift,caps,emoji: STD_LOGIC;
+	signal upper: STD_LOGIC := '0';
 	signal cstate : state;
 begin
 	ascii <= ascii_buf;
 	shift <= Lshift or Rshift;
-	upper <= shift or caps;
+	upper <= caps xor upper;
+	emoji <= shift;
 	
 	main: process(clk_cpu, rst_cpu, ps2_oe, shift, byte_buf, prev_byte) is
 	begin
@@ -108,6 +110,8 @@ begin
 							Lshift <= '0';
 						elsif (ps2_byte = x"59") then
 							Rshift <= '0';
+						elsif (ps2_byte = x"58") then
+							caps <= '0';
 						end if;
 						if (ps2_byte = prev_byte) then
 							prev_byte <= (others => '0');
@@ -136,10 +140,17 @@ begin
 								ascii_buf <= x"0010";
 								cstate <= start;
 								
+							--space
+							when x"29" =>
+								ascii_buf <= x"0020";
+								cstate <= start;
+								
 							-- a -> z
 							when x"1c" =>
 								if upper = '1' then
 									ascii_buf <= x"0041";
+								elsif emoji = '1' then
+									ascii_buf <= x"8081";
 								else
 									ascii_buf <= x"0061";
 								end if;
@@ -405,22 +416,80 @@ begin
 								
 							--'
 							when x"52" =>
-								ascii_buf <= x"0027";
+								if upper = '1' then
+									ascii_buf <= x"0022";
+								else
+									ascii_buf <= x"0027";
+								end if;
 								cstate <= start;
 							
 							--,
 							when x"41" =>
-								ascii_buf <= x"002c";
+								if upper = '1' then
+									ascii_buf <= x"003c";
+								else
+									ascii_buf <= x"002c";
+								end if;
 								cstate <= start;
 								
 							--.
 							when x"49" =>
-								ascii_buf <= x"002e";
+								if upper = '1' then
+									ascii_buf <= x"003e";
+								else
+									ascii_buf <= x"002e";
+								end if;
 								cstate <= start;
 								
 							--/
 							when x"4a" =>
-								ascii_buf <= x"002f";
+								if upper = '1' then
+									ascii_buf <= x"003f";
+								else
+									ascii_buf <= x"002f";
+								end if;
+								cstate <= start;
+							
+							--[{
+							when x"54" =>
+								if upper = '1' then
+									ascii_buf <= x"007b";
+								else
+									ascii_buf <= x"005b";
+								end if;
+								cstate <= start;
+								
+							--]}
+							when x"5b" =>
+								if upper = '1' then
+									ascii_buf <= x"007d";
+								else
+									ascii_buf <= x"005d";
+								end if;
+								cstate <= start;
+								
+							--;:
+							when x"4c" =>
+								if upper = '1' then
+									ascii_buf <= x"003a";
+								else
+									ascii_buf <= x"003b";
+								end if;
+								cstate <= start;
+								
+							-- LShift
+							when x"12" =>
+								Lshift <= '1';
+								cstate <= start;
+							
+							-- RShift
+							when x"59" =>
+								Rshift <= '1';
+								cstate <= start;
+								
+							-- CAB
+							when x"58" =>
+								caps <= '1';
 								cstate <= start;
 								
 							when others =>
