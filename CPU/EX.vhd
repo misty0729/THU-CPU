@@ -128,13 +128,13 @@ begin
 					
 				when EXE_SLTU_OP =>
 					if reg1_data_in < reg2_data_in then
-						arith_out <= ZeroWord;
+						arith_out <= "0000000000000001";
 					else
 						arith_out <= ZeroWord;
 					end if;
 				when EXE_SLTUI_OP =>
 					if reg1_data_in < reg2_data_in then
-						arith_out <= ZeroWord;
+						arith_out <= "0000000000000001";
 					else
 						arith_out <= ZeroWord;
 					end if;

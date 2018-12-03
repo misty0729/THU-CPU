@@ -36,6 +36,7 @@ entity SOPC is
     Port ( rst : in  STD_LOGIC;
            clk : in  STD_LOGIC;
 			  clk_step:	in STD_LOGIC;
+			  sw	: in 	STD_LOGIC_VECTOR (15 downto 0);
 			  
            led : out  STD_LOGIC_VECTOR (15 downto 0);
 			  dyp0: out STD_LOGIC_VECTOR(6 downto 0);
@@ -65,7 +66,6 @@ entity SOPC is
 			  flash_addr : 		 out 		STD_LOGIC_VECTOR(22 downto 0);
 			  flash_data : 		 inout 	STD_LOGIC_VECTOR(15 downto 0);
 			  
-			  sw:						 in  		STD_LOGIC_VECTOR(15 downto 0);
            Hs:						 out		STD_LOGIC;
            Vs:						 out  	STD_LOGIC;
 			  R:                  out 		STD_LOGIC_VECTOR (2 downto 0);
@@ -79,9 +79,13 @@ end SOPC;
 
 architecture Behavioral of SOPC is
 --CLICK_NEED
-signal clk_2: STD_LOGIC;
-signal clk_4: STD_LOGIC;
-signal clk_8: STD_LOGIC;
+--signal clk_in:STD_LOGIC;
+signal clk_chose:STD_LOGIC;
+signal clk_40:STD_LOGIC;
+signal clk_33_3:STD_LOGIC;
+signal clk_25: STD_LOGIC;
+signal clk_12_5: STD_LOGIC;
+signal clk_6_25: STD_LOGIC;
 
 --DEBUG_NEED
 signal fakedyp: STD_LOGIC_VECTOR(6 downto 0);
@@ -257,6 +261,17 @@ COMPONENT myvgaram
     doutb : OUT STD_LOGIC_VECTOR(6 DOWNTO 0)
   );
 END COMPONENT;
+
+component CLKGAIN
+	PORT(
+		 CLKIN_IN        : in    std_logic; 
+       RST_IN          : in    std_logic; 
+       CLKDV_OUT       : out   std_logic; 
+       CLKFX_OUT       : out   std_logic; 
+       CLKIN_IBUFG_OUT : out   std_logic; 
+       CLK0_OUT        : out   std_logic; 
+       LOCKED_OUT      : out   std_logic);
+end component;
 -- COMP_TAG_END ------ End COMPONENT Declaration ------------
 
 -- The following code must appear in the VHDL architecture
@@ -271,31 +286,55 @@ signal fakefakefakeled: STD_LOGIC_VECTOR(15 downto 0);
 signal fakedyp0: STD_LOGIC_VECTOR(6 downto 0);
 signal fakedyp1: STD_LOGIC_VECTOR(6 downto 0);
 begin
-	 get_clk_2:  process(clk)
-                begin
-                    if (rising_edge(clk)) then
-                        clk_2 <= not(clk_2);
+	 get_clk_2:  process(clk_40)
+               begin
+                    if (rising_edge(clk_40)) then
+                        clk_25 <= not(clk_25);
                     end if;
                 end process;
 
-    get_clk_4:  process(clk_2)
+    get_clk_4:  process(clk_25)
                 begin
-                    if (rising_edge(clk_2)) then
-                        clk_4 <= not(clk_4);
+                    if (rising_edge(clk_25)) then
+                        clk_12_5 <= not(clk_12_5);
                     end if;
                 end process;
+
+    get_clk_8:  process(clk_12_5)
+                begin
+                    if (rising_edge(clk_12_5)) then
+                        clk_6_25 <= not(clk_6_25);
+                    end if;
+                end process;
+	 get_clk: process(sw,clk_40,clk_33_3,clk_25,clk_12_5,clk_6_25,clk_step)
+				begin
+					 case sw is
+						when "0000000000000000" =>
+							clk_chose <= clk_40;
+						when "0000000000000001" =>
+							clk_chose <= clk_33_3;
+						when "0000000000000011" =>
+							clk_chose <= clk_25;
+						when "0000000000000111" =>
+							clk_chose <= clk_12_5;
+						when "0000000000001111" =>
+							clk_chose <= clk_step;
+						when others =>
+							clk_chose <= clk_6_25;
+						end case;
+				end process;
 
 	 ram_fail <= '0';
 	 rom_fail <= not(rom_sucess);
 	 rst_for_cpu <= rst and load_finish;
-    CPU_component: CPU port map(clk=>clk_4, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
+    CPU_component: CPU port map(clk=>clk_chose, rst=>rst_for_cpu, rom_read_data_in=>rom_read_data_in, rom_ce=>rom_ce, rom_addr=>rom_addr,
                                 ram_read_data_in=>ram_read_data_in, ram_ce=>ram_ce, ram_we=>ram_we, ram_write_data_out=>ram_write_data_out, ram_addr=>ram_addr,
-                                led=>fakefakeled, dyp0=>fakedyp, dyp1=>fakedyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
-	
+                                led=>led, dyp0=>fakedyp, dyp1=>fakedyp1, stallreq_from_if=>rom_fail, stallreq_from_mem=>ram_fail);
+	 clkgain_component : CLKGAIN port map(CLKIN_IN=>clk, RST_IN=>RstEnable, CLKFX_OUT=>clk_40, CLKDV_OUT=>clk_33_3);
 --  ROM_component: ROM port map(addr=>rom_addr, ce=>rom_ce, data=>rom_read_data_in);
 
 --  RAM_component: RAM port map(clk=>clk, ce=>ram_ce, we=>ram_we, data_in=>ram_write_data_out, addr=>ram_addr, data_out=>ram_read_data_in);
-	 RomRam_component: RomRam port map(clk=>clk_4, rst=>rst, 
+	 RomRam_component: RomRam port map(clk=>clk_chose, rst=>rst, 
 													rom_ce=>rom_ce, rom_addr=>rom_addr, rom_read_data=>rom_read_data_in,
 													ram_ce=>ram_ce, ram_we=>ram_we, ram_addr=>ram_addr, ram_write_data=>ram_write_data_out, ram_read_data=>ram_read_data_in,
 													Ram1EN=>Ram1EN, Ram1OE=>Ram1OE, Ram1WE=>Ram1WE, Ram1Addr=>Ram1Addr, Ram1Data=>Ram1Data, wrn=>wrn, rdn=>rdn,
@@ -304,18 +343,18 @@ begin
 													load_finish=>load_finish, tbre=>tbre, tsre=>tsre, data_ready=>data_ready, dyp=>dyp0, rom_success=>rom_sucess
 													,led=>fakeled,
 													vga_pixel_addr => vga_pixel_addr, vga_pixel_data => vga_pixel_data, vga_write_enable=>vga_write_enable, sw=>sw, vga_write_addr=>vga_write_addr, vga_write_data=>vga_write_data, kb_oe => kb_oe, kb_ascii => ascii_tmp);
-	 ps2_cpn : ps2 port map(clk_cpu => clk, rst_cpu => rst, ps2clk => ps2clk, ps2data => ps2data, byte => byte_tmp, OE => oe_tmp);
-	 kb : keyboard port map(clk_cpu => clk, rst_cpu => rst, ps2_byte => byte_tmp, ps2_oe => oe_tmp, ascii => ascii_tmp, kb_oe => kb_oe);												
-	 VGA_component: VGA port map(clk => clk, rst => rst, R => R, G => G, B => B, Hs => Hs, Vs => Vs, vga_pixel_addr => vga_pixel_addr,  vga_pixel_data=>vga_pixel_data, vga_read_addr=>vga_read_addr, vga_read_data=>vga_read_data, led=>led, dyp0=>fakedyp0, dyp1=>dyp1);
+	 ps2_cpn : ps2 port map(clk_cpu => clk_40, rst_cpu => rst, ps2clk => ps2clk, ps2data => ps2data, byte => byte_tmp, OE => oe_tmp);
+	 kb : keyboard port map(clk_cpu => clk_40, rst_cpu => rst, ps2_byte => byte_tmp, ps2_oe => oe_tmp, ascii => ascii_tmp, kb_oe => kb_oe);												
+	 VGA_component: VGA port map(clk => clk_40, rst => rst, R => R, G => G, B => B, Hs => Hs, Vs => Vs, vga_pixel_addr => vga_pixel_addr,  vga_pixel_data=>vga_pixel_data, vga_read_addr=>vga_read_addr, vga_read_data=>vga_read_data, led=>fakefakeled, dyp0=>fakedyp0, dyp1=>dyp1);
 
 	  
   VGARAM_component : myvgaram
   PORT MAP (
-    clka => clk,
+    clka => clk_40,
     wea => vga_write_enable,
     addra => vga_write_addr,
     dina => vga_write_data,
-    clkb => clk,
+    clkb => clk_40,
     addrb => vga_read_addr,
     doutb => vga_read_data
   );

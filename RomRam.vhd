@@ -202,7 +202,7 @@ begin
 	 vga_write_addr_control: process(clk, vga_write_addr_temp, ram_write)
 		begin
 			if (rising_edge(clk) and ram_write = WriteEnable) then
-				vga_write_addr <= conv_std_logic_vector(conv_integer(vga_write_addr_temp(15 downto 8))*80+conv_integer(vga_write_addr_temp(7 downto 0)),12);
+				vga_write_addr <= vga_write_addr_temp(11 downto 0);
 			end if;
 		end process;
 		

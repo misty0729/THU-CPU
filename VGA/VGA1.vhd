@@ -69,8 +69,9 @@ begin
 	offset_j <= j mod 8;
    vga_read_addr <= conv_std_logic_vector(block_i * 80 + block_j, 12);
 	vga_pixel_addr_temp <= start_addr + conv_integer("000000000" & vga_read_data) * block_size + offset_i * 8 + offset_j;
-	led(15 downto 8) <= vga_pixel_addr_temp(7 downto 0);
-	led(7 downto 0) <= vga_pixel_data(7 downto 0);
+	--led(15 downto 8) <= vga_pixel_addr_temp(7 downto 0);
+	--led(7 downto 0) <= vga_pixel_data(7 downto 0);
+	led <= vga_pixel_addr_temp;
 	get_clk_2: process(clk) is
 	begin
 		if rising_edge(clk) then
