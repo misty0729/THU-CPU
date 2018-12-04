@@ -158,6 +158,8 @@ begin
 							when x"32" =>
 								if upper = '1' then
 									ascii_buf <= x"0042";
+								elsif emoji = '1' then
+									ascii_buf <= x"8283";
 								else
 									ascii_buf <= x"0062";
 								end if;
@@ -165,6 +167,8 @@ begin
 							when x"21" =>
 								if upper = '1' then
 									ascii_buf <= x"0043";
+								elsif emoji = '1' then
+									ascii_buf <= x"8485";
 								else
 									ascii_buf <= x"0063";
 								end if;
@@ -172,6 +176,8 @@ begin
 							when x"23" =>
 								if upper = '1' then
 									ascii_buf <= x"0044";
+								elsif emoji = '1' then
+									ascii_buf <= x"8687";
 								else
 									ascii_buf <= x"0064";
 								end if;
@@ -179,6 +185,8 @@ begin
 							when x"24" =>
 								if upper = '1' then
 									ascii_buf <= x"0045";
+								elsif emoji = '1' then
+									ascii_buf <= x"8889";
 								else
 									ascii_buf <= x"0065";
 								end if;
@@ -186,6 +194,8 @@ begin
 							when x"2b" =>
 								if upper = '1' then
 									ascii_buf <= x"0046";
+								elsif emoji = '1' then
+									ascii_buf <= x"8a8b";
 								else
 									ascii_buf <= x"0066";
 								end if;
@@ -193,6 +203,8 @@ begin
 							when x"34" =>
 								if upper = '1' then
 									ascii_buf <= x"0047";
+								elsif emoji = '1' then
+									ascii_buf <= x"8c8d";
 								else
 									ascii_buf <= x"0067";
 								end if;
@@ -200,6 +212,8 @@ begin
 							when x"33" =>
 								if upper = '1' then
 									ascii_buf <= x"0048";
+								elsif emoji = '1' then
+									ascii_buf <= x"8e8f";
 								else
 									ascii_buf <= x"0068";
 								end if;
@@ -207,6 +221,8 @@ begin
 							when x"43" =>
 								if upper = '1' then
 									ascii_buf <= x"0049";
+								elsif emoji = '1' then
+									ascii_buf <= x"9091";
 								else
 									ascii_buf <= x"0069";
 								end if;
@@ -214,6 +230,8 @@ begin
 							when x"3b" =>
 								if upper = '1' then
 									ascii_buf <= x"004a";
+								elsif emoji = '1' then
+									ascii_buf <= x"9293";
 								else
 									ascii_buf <= x"006a";
 								end if;
@@ -221,6 +239,8 @@ begin
 							when x"42" =>
 								if upper = '1' then
 									ascii_buf <= x"004b";
+								elsif emoji = '1' then
+									ascii_buf <= x"9495";
 								else
 									ascii_buf <= x"006b";
 								end if;
@@ -228,6 +248,8 @@ begin
 							when x"4b" =>
 								if upper = '1' then
 									ascii_buf <= x"004c";
+								elsif emoji = '1' then
+									ascii_buf <= x"9697";
 								else
 									ascii_buf <= x"006c";
 								end if;
@@ -235,6 +257,8 @@ begin
 							when x"3a" =>
 								if upper = '1' then
 									ascii_buf <= x"004d";
+								elsif emoji = '1' then
+									ascii_buf <= x"9899";
 								else
 									ascii_buf <= x"006d";
 								end if;
@@ -242,6 +266,8 @@ begin
 							when x"31" =>
 								if upper = '1' then
 									ascii_buf <= x"004e";
+								elsif emoji = '1' then
+									ascii_buf <= x"9a9b";
 								else
 									ascii_buf <= x"006e";
 								end if;
@@ -249,6 +275,8 @@ begin
 							when x"44" =>
 								if upper = '1' then
 									ascii_buf <= x"004f";
+								elsif emoji = '1' then
+									ascii_buf <= x"9c9d";
 								else
 									ascii_buf <= x"006f";
 								end if;
@@ -256,6 +284,8 @@ begin
 							when x"4d" =>
 								if upper = '1' then
 									ascii_buf <= x"0050";
+								elsif emoji = '1' then
+									ascii_buf <= x"9e9f";
 								else
 									ascii_buf <= x"0070";
 								end if;
@@ -263,6 +293,8 @@ begin
 							when x"15" =>
 								if upper = '1' then
 									ascii_buf <= x"0051";
+								elsif emoji = '1' then
+									ascii_buf <= x"a0a1";
 								else
 									ascii_buf <= x"0071";
 								end if;
@@ -270,6 +302,8 @@ begin
 							when x"2d" =>
 								if upper = '1' then
 									ascii_buf <= x"0052";
+								elsif emoji = '1' then
+									ascii_buf <= x"a2a3";
 								else
 									ascii_buf <= x"0072";
 								end if;
@@ -277,6 +311,8 @@ begin
 							when x"1b" =>
 								if upper = '1' then
 									ascii_buf <= x"0053";
+								elsif emoji = '1' then
+									ascii_buf <= x"a4a5";
 								else
 									ascii_buf <= x"0073";
 								end if;
@@ -284,6 +320,8 @@ begin
 							when x"2c" =>
 								if upper = '1' then
 									ascii_buf <= x"0054";
+								elsif emoji = '1' then
+									ascii_buf <= x"a6a7";
 								else
 									ascii_buf <= x"0074";
 								end if;
@@ -291,6 +329,8 @@ begin
 							when x"3c" =>
 								if upper = '1' then
 									ascii_buf <= x"0055";
+								elsif emoji = '1' then
+									ascii_buf <= x"a8a9";
 								else
 									ascii_buf <= x"0075";
 								end if;
@@ -298,6 +338,8 @@ begin
 							when x"2a" =>
 								if upper = '1' then
 									ascii_buf <= x"0056";
+								elsif emoji = '1' then
+									ascii_buf <= x"aaab";
 								else
 									ascii_buf <= x"0076";
 								end if;
@@ -305,6 +347,8 @@ begin
 							when x"1d" =>
 								if upper = '1' then
 									ascii_buf <= x"0057";
+								elsif emoji = '1' then
+									ascii_buf <= x"acad";
 								else
 									ascii_buf <= x"0077";
 								end if;
@@ -312,6 +356,8 @@ begin
 							when x"22" =>
 								if upper = '1' then
 									ascii_buf <= x"0058";
+								elsif emoji = '1' then
+									ascii_buf <= x"aeaf";
 								else
 									ascii_buf <= x"0078";
 								end if;
@@ -319,6 +365,8 @@ begin
 							when x"35" =>
 								if upper = '1' then
 									ascii_buf <= x"0059";
+								elsif emoji = '1' then
+									ascii_buf <= x"b0b1";
 								else
 									ascii_buf <= x"0079";
 								end if;
@@ -326,6 +374,8 @@ begin
 							when x"1a" =>
 								if upper = '1' then
 									ascii_buf <= x"005a";
+								elsif emoji = '1' then
+									ascii_buf <= x"b2b3";
 								else
 									ascii_buf <= x"007a";
 								end if;
@@ -423,6 +473,10 @@ begin
 								end if;
 								cstate <= start;
 							
+							--tab
+							when x"0d" =>
+								ascii_buf <= x"0001";
+								
 							--,
 							when x"41" =>
 								if upper = '1' then
