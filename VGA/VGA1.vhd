@@ -53,21 +53,28 @@ architecture Behavioral of VGA is
 	signal clk_2 : STD_LOGIC;
 	signal i : integer := 0;
 	signal j : integer := 0;
+	signal next_i : integer := 0;
+	signal next_j : integer := 0;
 	constant block_size: integer:= 128;
 	constant start_addr : STD_LOGIC_VECTOR(15 downto 0) := "0001000000000000";
 	signal block_i : integer;
 	signal block_j : integer;
 	signal offset_i : integer;
 	signal offset_j : integer;
+	signal next_block_i : integer;
+	signal next_block_j : integer;
 	signal block_addr : integer;
 	signal vga_pixel_addr_temp: STD_LOGIC_VECTOR(15 downto 0);
 begin
 	vga_pixel_addr <= vga_pixel_addr_temp;
+	next_block_i <= next_i / 16;
+	next_block_j <= next_j / 8;
+	
 	block_i <= i / 16;
 	offset_i <= i mod 16;
 	block_j <= j / 8;
 	offset_j <= j mod 8;
-   vga_read_addr <= conv_std_logic_vector(block_i * 80 + block_j, 12);
+   vga_read_addr <= conv_std_logic_vector(next_block_i * 80 + next_block_j, 12);
 	vga_pixel_addr_temp <= start_addr + conv_integer("00000000" & vga_read_data) * block_size + offset_i * 8 + offset_j;
 	--led(15 downto 8) <= vga_pixel_addr_temp(7 downto 0);
 	--led(7 downto 0) <= vga_pixel_data(7 downto 0);
@@ -127,5 +134,28 @@ begin
 			end if;
 		end if;
 	end process;
+	
+	get_next_j: process(j)
+				begin
+					if j = 799 then
+						next_j <= 0;
+					else
+						next_j <= j + 1;
+					end if;
+				end process;
+	
+	get_next_i: process(i,j)
+				begin
+					if j = 799 then
+						if i = 524 then
+							next_i <= 0;
+						else
+							next_i <= i + 1;
+						end if;
+					else
+						next_i <= i;
+					end if;
+				end process;
+				
 end Behavioral;
 

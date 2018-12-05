@@ -258,7 +258,7 @@ begin
 								if upper = '1' then
 									ascii_buf <= x"004d";
 								elsif emoji = '1' then
-									ascii_buf <= x"9899";
+									ascii_buf <= x"E0E1";
 								else
 									ascii_buf <= x"006d";
 								end if;
@@ -312,7 +312,7 @@ begin
 								if upper = '1' then
 									ascii_buf <= x"0053";
 								elsif emoji = '1' then
-									ascii_buf <= x"a4a5";
+									ascii_buf <= x"b4b5";
 								else
 									ascii_buf <= x"0073";
 								end if;
