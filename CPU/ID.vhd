@@ -510,7 +510,7 @@ begin
 							
 							when "01110" =>		--CMPI  01110 rx imm
 								op_temp								<= EXE_CMPI_OP;
-								op_type_out							<= EXE_ARITH_TYPE;
+								op_type_out							<= EXE_LOGIC_TYPE;
 								reg1_read_temp						<= ReadEnable;
 								reg1_addr_temp						<= x;
 								imm									<= SXT(imm8,16);

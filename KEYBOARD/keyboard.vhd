@@ -81,7 +81,7 @@ begin
 					kb_oe <= '0';
 					if ps2_oe = '1' then
 						case ps2_byte is
-							--up down left right
+							--up  left down right
 							when x"75" =>
 								ascii_buf <= x"0011";
 								cstate <= start;
